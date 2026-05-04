@@ -1,0 +1,228 @@
+name: healthy_food
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  firebase_core: ^4.5.0
+  firebase_auth: ^6.2.0
+  shared_preferences: ^2.5.4
+  cloud_firestore: ^6.1.3
+  http: ^1.6.0
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^5.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+     - assests/logo.webp
+     - assests/onbording1.jpeg
+     - assests/onbording2.jpeg
+     - assests/onbording3.jpeg
+     - assests/congratolation.jpg
+     - assests/images/breakfast/foul.jpg
+     - assests/images/breakfast/egg_vegetable.jpg
+     - assests/images/breakfast/egg_tost.jpg
+     - assests/images/breakfast/cheese_tomato.jpeg
+     - assests/images/breakfast/yogurt_oats.jpg
+     - assests/images/breakfast/tost_butter.jpg
+     - assests/images/breakfast/foul_egg.jpg
+     - assests/images/breakfast/lentils.webp
+     - assests/images/breakfast/hummas_tahini.jpg
+     - assests/images/breakfast/cheese_egg.jpg
+     - assests/images/breakfast/yogurt_honey.webp
+     - assests/images/breakfast/tost_cheesse.jpg
+     - assests/images/breakfast/botato_yougrt.jpg
+     - assests/images/breakfast/oats_milk.webp
+     - assests/images/breakfast/foul_tahinin.jpg
+     - assests/images/breakfast/egg_cheese.jpg
+     - assests/images/breakfast/yogurt_fruits.jpg
+     - assests/images/breakfast/tost_egg.jpg
+     - assests/images/breakfast/cheese_fruit.jpg
+     - assests/images/breakfast/tea_tost.jpg
+     - assests/images/lunch/coshari.jpg
+     - assests/images/lunch/pasta_meat.jpg
+     - assests/images/lunch/potato_meat.jpg
+     - assests/images/lunch/rice_checken.jpg
+     - assests/images/lunch/rice_fish.jpg
+     - assests/images/lunch/mashi_kosa.webp
+     - assests/images/lunch/mashi_grapeleaves.jpeg
+     - assests/images/lunch/mashi_eggplant.jpg
+     - assests/images/lunch/mashi_all.jpg
+     - assests/images/lunch/mulukhai.jpg
+     - assests/images/lunch/shawarma.webp
+     - assests/images/lunch/macaronibechamel.jpg
+     - assests/images/lunch/rice_tona.jpg
+     - assests/images/lunch/rice_kofta.jpg
+     - assests/images/lunch/fish_salada.jpg
+     - assests/images/lunch/potato_cheken.jpg
+     - assests/images/lunch/pasta_pane.webp
+     - assests/images/lunch/kbda.jpg
+     - assests/images/lunch/rice_besla.jpg
+     - assests/images/lunch/tona_salad.jpeg
+     - assests/images/dinner/cucamber_cheese.webp
+     - assests/images/dinner/fruit_yogurt.jpg
+     - assests/images/dinner/salad_tona.jpg
+     - assests/images/dinner/shorba_vegetable.jpg
+     - assests/images/dinner/tust_cheese.jpg
+     - assests/images/dinner/vegetable_egg.jpg
+     - assests/images/dinner/shofan_yougrat.jpg
+     - assests/images/dinner/tomato_cheese.png
+     - assests/images/dinner/sodani_tust.jpg
+     - assests/images/dinner/fruits.jpg
+     - assests/images/dinner/honey_yogurt.jpg
+     - assests/images/dinner/scrambledeggs.jpg
+     - assests/images/dinner/shorba_lentils.jpg
+     - assests/images/dinner/masloka_potato.jpg
+     - assests/images/dinner/ziton_cheese.jpg
+     - assests/images/dinner/shorba_cheken.jpg
+     - assests/images/dinner/shakshoka.jpg
+     - assests/images/dinner/mashoi_potato.jpg
+     - assests/images/dinner/mksrat_yougrat.png
+     - assests/images/dinner/tust_egg.jpg
+     - assests/images/snacks/apple.jpg
+     - assests/images/snacks/banana.jpeg
+     - assests/images/snacks/basbosa.jpg
+     - assests/images/snacks/cake.webp
+     - assests/images/snacks/chocolate.jpg
+     - assests/images/snacks/gopha.webp
+     - assests/images/snacks/grape.jpg
+     - assests/images/snacks/haloeat.jpg
+     - assests/images/snacks/komsra.jpg
+     - assests/images/snacks/konfa.jpeg
+     - assests/images/snacks/ktaef.jpg
+     - assests/images/snacks/milkrice.webp
+     - assests/images/snacks/orange.jpg
+     - assests/images/snacks/popcorn.jpg
+     - assests/images/snacks/pscot_chocolate.jpg
+     - assests/images/snacks/pscot_shophane.jpg
+     - assests/images/snacks/pscot.jpg
+     - assests/images/snacks/starbawly.webp
+     - assests/images/snacks/tamr.jpg
+     - assests/images/snacks/zora.jpg
+     - assests/images/workout/armcircle.jpg
+     - assests/images/workout/back.jpg
+     - assests/images/workout/berbe.jpeg
+     - assests/images/workout/blank.jpg
+     - assests/images/workout/btn.webp
+     - assests/images/workout/corfsa.jpg
+     - assests/images/workout/etala.jpg
+     - assests/images/workout/gsr.webp
+     - assests/images/workout/highknees.jpg
+     - assests/images/workout/jump.jpg
+     - assests/images/workout/jumpkorfsa.jpeg
+     - assests/images/workout/legraise.webp
+     - assests/images/workout/lunges.jpg
+     - assests/images/workout/motaslkmountain.jpg
+     - assests/images/workout/Reverse Plank.jpg 
+     - assests/images/workout/sideplank.jpg
+     - assests/images/workout/starjump.jpg
+     - assests/images/workout/stress.jpg
+     - assests/images/workout/superman.jpg
+     - assests/images/workout/wallsite.png
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
