@@ -23,8 +23,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String _goal = '';
 
   final List<String> _genders = ['ذكر', 'أنثى'];
-  final List<String> _goals = ['خسارة وزن', 'زيادة عضلات', 'تثبيت الوزن'];
-
+  final List<String> _goals = [
+    'خسارة وزن',
+    'زيادة وزن',
+    'زيادة عضلات',
+    'تثبيت الوزن',
+  ];
   @override
   void initState() {
     super.initState();
@@ -45,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _age = data.age;
             _height = data.height;
             _weight = data.weight;
-            _goal = data.goal;
+            _goal = _goals.contains(data.goal) ? data.goal : '';
             _isLoading = false;
           });
         } else {
@@ -252,7 +256,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       const SizedBox(height: 16),
 
                       DropdownButtonFormField<String>(
-                        value: _goal.isEmpty ? null : _goal,
+                        value: _goals.contains(_goal) ? _goal : null,
                         decoration: const InputDecoration(
                           labelText: 'الهدف',
                           prefixIcon: Icon(Icons.flag),
@@ -268,7 +272,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               ),
                             )
                             .toList(),
-                        onChanged: (value) => setState(() => _goal = value!),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _goal = value);
+                          }
+                        },
                         validator: (value) => value == null || value.isEmpty
                             ? 'الهدف مطلوب'
                             : null,

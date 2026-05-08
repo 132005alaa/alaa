@@ -15,61 +15,70 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _rememberMe = false;
+
   void _loadSavedEmail() async {
     final prefs = await SharedPreferences.getInstance();
     String? savedEmail = prefs.getString('saved_email');
-
     if (savedEmail != null) {
       _emailController.text = savedEmail;
-      setState(() {
-        _rememberMe = true;
-      });
+      setState(() => _rememberMe = true);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadSavedEmail(); // تحميل البريد المحفوظ
+    _loadSavedEmail();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const SizedBox(height: 80),
+              SizedBox(height: screenHeight * 0.09),
+
+              // ── العنوان ──
               Center(
                 child: Text(
                   'تسجيل دخول',
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: screenWidth * 0.075,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+
+              SizedBox(height: screenHeight * 0.012),
+
               Center(
                 child: Text(
                   'برجاء تسجيل الدخول الي حسابك الحالي',
-                  style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045,
+                    color: Colors.grey.shade600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 50),
 
-              // رسالة الخطأ
+              SizedBox(height: screenHeight * 0.04),
+
+              // ── رسالة الخطأ ──
               if (_errorMessage != null)
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(12),
-                  margin: EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.all(screenWidth * 0.03),
+                  margin: EdgeInsets.only(bottom: screenHeight * 0.02),
                   decoration: BoxDecoration(
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(10),
@@ -82,16 +91,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-              // البريد الإلكتروني
+              // ── البريد الإلكتروني ──
               Text(
                 'البريد الالكتروني',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.045,
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              SizedBox(height: screenHeight * 0.01),
+
               TextField(
                 controller: _emailController,
                 textAlign: TextAlign.right,
@@ -101,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   hintText: 'email@gmail.com',
                   hintStyle: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: 15,
+                    fontSize: screenWidth * 0.038,
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade200,
@@ -110,23 +121,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
                   ),
                 ),
               ),
-              const SizedBox(height: 25),
 
-              // كلمة المرور
+              SizedBox(height: screenHeight * 0.022),
+
+              // ── كلمة المرور ──
               Text(
                 'كلمه المرور',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.045,
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              SizedBox(height: screenHeight * 0.01),
+
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -135,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   hintText: '**********',
                   hintStyle: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: 15,
+                    fontSize: screenWidth * 0.038,
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade200,
@@ -144,8 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -154,62 +168,61 @@ class _LoginScreenState extends State<LoginScreen> {
                           : Icons.visibility_outlined,
                       color: Colors.grey.shade700,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
 
-              // تذكرني ونسيت كلمة المرور
+              SizedBox(height: screenHeight * 0.015),
+
+              // ── تذكرني ونسيت كلمة المرور ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/forgot');
-                    },
+                    onTap: () => Navigator.pushNamed(context, '/forgot'),
                     child: Text(
                       'نسيت كلمه المرور',
-                      style: TextStyle(color: Color(0xff9ACD32), fontSize: 16),
+                      style: TextStyle(
+                        color: const Color(0xff9ACD32),
+                        fontSize: screenWidth * 0.038,
+                      ),
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _rememberMe = !_rememberMe;
-                      });
-                    },
+                    onTap: () => setState(() => _rememberMe = !_rememberMe),
                     child: Row(
                       children: [
                         Text(
                           'تذكرني',
                           style: TextStyle(
                             color: Colors.grey.shade600,
-                            fontSize: 16,
+                            fontSize: screenWidth * 0.038,
                           ),
                         ),
-                        SizedBox(width: 5),
+                        SizedBox(width: screenWidth * 0.02),
                         Container(
-                          width: 20,
-                          height: 20,
+                          width: screenWidth * 0.05,
+                          height: screenWidth * 0.05,
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: _rememberMe
-                                  ? Color(0xff9ACD32)
+                                  ? const Color(0xff9ACD32)
                                   : Colors.grey.shade400,
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(4),
                             color: _rememberMe
-                                ? Color(0xff9ACD32)
+                                ? const Color(0xff9ACD32)
                                 : Colors.transparent,
                           ),
                           child: _rememberMe
-                              ? Icon(Icons.check, size: 16, color: Colors.white)
+                              ? Icon(
+                                  Icons.check,
+                                  size: screenWidth * 0.035,
+                                  color: Colors.white,
+                                )
                               : null,
                         ),
                       ],
@@ -217,43 +230,45 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
 
-              // زر تسجيل الدخول
-              Center(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: _isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : ElevatedButton(
-                          onPressed: _signIn,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff9ACD32),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 0,
+              SizedBox(height: screenHeight * 0.035),
+
+              // ── زر تسجيل الدخول ──
+              SizedBox(
+                width: double.infinity,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: _signIn,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff9ACD32),
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.02,
                           ),
-                          child: const Text(
-                            'تسجيل الدخول',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              screenWidth * 0.08,
                             ),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'تسجيل الدخول',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.048,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                ),
+                      ),
               ),
-              const SizedBox(height: 25),
 
-              // الانتقال للتسجيل
+              SizedBox(height: screenHeight * 0.025),
+
+              // ── الانتقال للتسجيل ──
               Center(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
+                  onTap: () => Navigator.pushNamed(context, '/register'),
                   child: RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -262,15 +277,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           text: 'ليس لدي حساب؟',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 18,
+                            fontSize: screenWidth * 0.043,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         TextSpan(
                           text: ' سجل الان',
                           style: TextStyle(
-                            color: Color(0xff9ACD32),
-                            fontSize: 18,
+                            color: const Color(0xff9ACD32),
+                            fontSize: screenWidth * 0.043,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -279,39 +294,42 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 35),
+
+              SizedBox(height: screenHeight * 0.03),
+
               Center(
                 child: Text(
                   'او',
-                  style: TextStyle(fontSize: 25, color: Colors.black),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.058,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-              const SizedBox(height: 35),
 
-              // أيقونات التواصل الاجتماعي
+              SizedBox(height: screenHeight * 0.03),
+
+              // ── أيقونات التواصل الاجتماعي ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildSocialIcon(Icons.apple, () {
-                    // هتضيفي Apple Sign In بعدين
-                  }),
-                  SizedBox(width: 50),
+                  _buildSocialIcon(Icons.apple, () {}, screenWidth),
+                  SizedBox(width: screenWidth * 0.1),
                   _buildSocialIconNetwork(
                     'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
-                    () {
-                      // هتضيفي Google Sign In بعدين
-                    },
+                    () {},
+                    screenWidth,
                   ),
-                  SizedBox(width: 50),
+                  SizedBox(width: screenWidth * 0.1),
                   _buildSocialIconNetwork(
                     'https://cdn-icons-png.flaticon.com/512/733/733547.png',
-                    () {
-                      // هتضيفي Facebook Sign In بعدين
-                    },
+                    () {},
+                    screenWidth,
                   ),
                 ],
               ),
-              const SizedBox(height: 50),
+
+              SizedBox(height: screenHeight * 0.05),
             ],
           ),
         ),
@@ -320,7 +338,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signIn() async {
-    // التحقق من الحقول
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
         _errorMessage = 'من فضلك أدخل البريد الإلكتروني وكلمة المرور';
@@ -334,7 +351,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // تسجيل الدخول عبر Firebase
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
             email: _emailController.text.trim(),
@@ -342,7 +358,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
 
       if (userCredential.user != null) {
-        // ✅ حفظ البريد إذا تم اختيار "تذكرني"
         final prefs = await SharedPreferences.getInstance();
         if (_rememberMe) {
           await prefs.setString('saved_email', _emailController.text.trim());
@@ -350,13 +365,12 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.remove('saved_email');
         }
 
-        // التحقق من البريد الإلكتروني قبل التنقل
         if (!mounted) return;
 
         if (userCredential.user!.emailVerified) {
-          Navigator.pushReplacementNamed(context, '/home'); // الصفحة الرئيسية
+          Navigator.pushReplacementNamed(context, '/home');
         } else {
-          Navigator.pushReplacementNamed(context, '/success'); // صفحة التحقق
+          Navigator.pushReplacementNamed(context, '/success');
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -380,31 +394,25 @@ class _LoginScreenState extends State<LoginScreen> {
         default:
           message = 'حدث خطأ: ${e.message}';
       }
-      setState(() {
-        _errorMessage = message;
-      });
-    } catch (e, stackTrace) {
-      // طباعة أي خطأ غير متوقع في console لتصحيح المشاكل
+      setState(() => _errorMessage = message);
+    } catch (e) {
       print('Error during login: $e');
-      print(stackTrace);
-      setState(() {
-        _errorMessage = 'حدث خطأ غير متوقع';
-      });
+      setState(() => _errorMessage = 'حدث خطأ غير متوقع');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Widget _buildSocialIcon(IconData icon, VoidCallback onTap) {
+  Widget _buildSocialIcon(
+    IconData icon,
+    VoidCallback onTap,
+    double screenWidth,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 60,
-        height: 60,
+        width: screenWidth * 0.14,
+        height: screenWidth * 0.14,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -416,17 +424,21 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
-        child: Icon(icon, size: 50, color: Colors.black),
+        child: Icon(icon, size: screenWidth * 0.11, color: Colors.black),
       ),
     );
   }
 
-  Widget _buildSocialIconNetwork(String imageUrl, VoidCallback onTap) {
+  Widget _buildSocialIconNetwork(
+    String imageUrl,
+    VoidCallback onTap,
+    double screenWidth,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 60,
-        height: 60,
+        width: screenWidth * 0.14,
+        height: screenWidth * 0.14,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -438,7 +450,13 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
-        child: Center(child: Image.network(imageUrl, width: 35, height: 35)),
+        child: Center(
+          child: Image.network(
+            imageUrl,
+            width: screenWidth * 0.08,
+            height: screenWidth * 0.08,
+          ),
+        ),
       ),
     );
   }

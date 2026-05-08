@@ -11,21 +11,25 @@ class LunchSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> meals = LunchData.getLunchMeals();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.05,
+                vertical: screenHeight * 0.018,
+              ),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.maybePop(context),
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(screenWidth * 0.02),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
@@ -36,9 +40,9 @@ class LunchSelectionPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.chevron_left,
-                        size: 30,
+                        size: screenWidth * 0.07,
                         color: Colors.black87,
                       ),
                     ),
@@ -47,28 +51,28 @@ class LunchSelectionPage extends StatelessWidget {
                     child: Center(
                       child: Text(
                         mealType,
-                        style: const TextStyle(
-                          fontSize: 25,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.058,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 42),
+                  SizedBox(width: screenWidth * 0.1),
                 ],
               ),
             ),
 
-            // قائمة الوجبات
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.04,
+                  vertical: screenHeight * 0.01,
                 ),
                 itemCount: meals.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                separatorBuilder: (_, __) =>
+                    SizedBox(height: screenHeight * 0.018),
                 itemBuilder: (context, index) => _LunchCard(meal: meals[index]),
               ),
             ),
@@ -86,6 +90,9 @@ class _LunchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     final String name = meal['name'];
     final String portion = meal['portion'] ?? '';
     final int calories = meal['calories'];
@@ -94,27 +101,27 @@ class _LunchCard extends StatelessWidget {
     final int fat = meal['fat'];
     final String ingredients = meal['ingredients'];
 
+    final cardHeight = screenHeight * 0.38;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(screenWidth * 0.055),
       child: SizedBox(
-        height: 340,
+        height: cardHeight,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // صورة الوجبة
             Image.asset(
               meal['image'],
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                 color: const Color(0xffD6EFA0),
-                child: const Icon(
+                child: Icon(
                   Icons.restaurant,
-                  size: 60,
-                  color: Color(0xff6BAF1A),
+                  size: screenWidth * 0.14,
+                  color: const Color(0xff6BAF1A),
                 ),
               ),
             ),
-            // طبقة التعتيم
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -130,91 +137,101 @@ class _LunchCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // المحتوى
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(screenWidth * 0.04),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(
-                        fontSize: 24,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.055,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 8),
+                        ],
                       ),
                       textDirection: TextDirection.rtl,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: screenHeight * 0.004),
                     Text(
                       portion,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.032,
                         color: Colors.white70,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 4),
+                        ],
                       ),
                       textDirection: TextDirection.rtl,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: screenHeight * 0.005),
                     Text(
                       ingredients,
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.029,
                         color: Colors.white60,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 4),
+                        ],
                       ),
                       textDirection: TextDirection.rtl,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: screenHeight * 0.007),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03,
+                        vertical: screenHeight * 0.004,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xffC8E63A).withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(screenWidth * 0.05),
                       ),
                       child: Text(
                         '🔥 $calories سعرة حرارية',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.034,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xff2A3A00),
+                          color: const Color(0xff2A3A00),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: screenHeight * 0.008),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _nutriLabel(emoji: '🧈', label: 'دهون', value: fat),
-                        const SizedBox(width: 16),
+                        _nutriLabel(
+                          emoji: '🧈',
+                          label: 'دهون',
+                          value: fat,
+                          screenWidth: screenWidth,
+                        ),
+                        SizedBox(width: screenWidth * 0.04),
                         _nutriLabel(
                           emoji: '🌾',
                           label: 'كربوهيدرات',
                           value: carbs,
+                          screenWidth: screenWidth,
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: screenWidth * 0.04),
                         _nutriLabel(
                           emoji: '🟡',
                           label: 'بروتين',
                           value: protein,
+                          screenWidth: screenWidth,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: screenHeight * 0.01),
                     Center(
                       child: GestureDetector(
                         onTap: () async {
                           final mealService = MealTrackingService();
-
                           await mealService.addMeal(
                             mealName: name,
                             calories: calories,
@@ -224,7 +241,6 @@ class _LunchCard extends StatelessWidget {
                             mealType: 'الغداء',
                             portion: portion,
                           );
-
                           await NotificationService().addMealReminder(name);
                           await NotificationService()
                               .addMotivationalNotification();
@@ -238,18 +254,21 @@ class _LunchCard extends StatelessWidget {
                                 backgroundColor: const Color(0xff6BAF1A),
                               ),
                             );
-
                             Future.delayed(const Duration(seconds: 1), () {
                               if (context.mounted) Navigator.pop(context);
                             });
                           }
                         },
                         child: Container(
-                          width: 240,
-                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          width: screenWidth * 0.6,
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.015,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xffC8E63A),
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(
+                              screenWidth * 0.08,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
@@ -258,22 +277,22 @@ class _LunchCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 'اضافه الوجبه',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: screenWidth * 0.038,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xff2A3A00),
+                                  color: const Color(0xff2A3A00),
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              SizedBox(width: screenWidth * 0.02),
                               Icon(
                                 Icons.add_circle_outline,
-                                color: Color(0xff2A3A00),
-                                size: 20,
+                                color: const Color(0xff2A3A00),
+                                size: screenWidth * 0.048,
                               ),
                             ],
                           ),
@@ -294,32 +313,33 @@ class _LunchCard extends StatelessWidget {
     required String emoji,
     required String label,
     required int value,
+    required double screenWidth,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '$value',
-          style: const TextStyle(
-            fontSize: 19,
+          style: TextStyle(
+            fontSize: screenWidth * 0.044,
             fontWeight: FontWeight.w900,
             color: Colors.white,
-            shadows: [Shadow(color: Colors.black54, blurRadius: 5)],
+            shadows: const [Shadow(color: Colors.black54, blurRadius: 5)],
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: screenWidth * 0.01),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: screenWidth * 0.037,
             fontWeight: FontWeight.w700,
             color: Colors.white,
-            shadows: [Shadow(color: Colors.black54, blurRadius: 5)],
+            shadows: const [Shadow(color: Colors.black54, blurRadius: 5)],
           ),
           textDirection: TextDirection.rtl,
         ),
-        const SizedBox(width: 4),
-        Text(emoji, style: const TextStyle(fontSize: 17)),
+        SizedBox(width: screenWidth * 0.01),
+        Text(emoji, style: TextStyle(fontSize: screenWidth * 0.04)),
       ],
     );
   }

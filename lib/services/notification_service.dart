@@ -6,7 +6,6 @@ class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // جلب جميع إشعارات المستخدم
   Stream<List<NotificationModel>> getNotifications() {
     String userId = _auth.currentUser!.uid;
 
@@ -23,7 +22,6 @@ class NotificationService {
         });
   }
 
-  // جلب عدد الإشعارات غير المقروءة
   Stream<int> getUnreadCount() {
     String userId = _auth.currentUser!.uid;
 
@@ -36,7 +34,6 @@ class NotificationService {
         .map((snapshot) => snapshot.docs.length);
   }
 
-  // تحديث حالة الإشعار (مقروء/غير مقروء)
   Future<void> markAsRead(String notificationId) async {
     String userId = _auth.currentUser!.uid;
 
@@ -48,7 +45,6 @@ class NotificationService {
         .update({'isRead': true});
   }
 
-  // 🟢 إضافة إشعار عام
   Future<void> addNotification({
     required String title,
     required String subtitle,
@@ -73,7 +69,6 @@ class NotificationService {
         .add(notification.toMap());
   }
 
-  // 🟢 إشعارات تحفيزية متنوعة
   Future<void> addMotivationalNotification() async {
     List<Map<String, String>> motivationalMessages = [
       {
@@ -110,7 +105,6 @@ class NotificationService {
     );
   }
 
-  // 🟢 إشعارات شرب الماء
   Future<void> addWaterReminderNotification() async {
     List<Map<String, String>> waterMessages = [
       {
@@ -145,7 +139,6 @@ class NotificationService {
     );
   }
 
-  // 🟢 إشعارات تذكير بالوجبات
   Future<void> addMealReminder(String mealType) async {
     Map<String, Map<String, String>> mealMessages = {
       'الفطار': {
@@ -181,7 +174,6 @@ class NotificationService {
     }
   }
 
-  // 🟢 إشعارات التمارين
   Future<void> addWorkoutReminder() async {
     List<Map<String, String>> workoutMessages = [
       {
@@ -212,7 +204,6 @@ class NotificationService {
     );
   }
 
-  // 🟢 إشعارات تحقيق الأهداف
   Future<void> addGoalAchievementNotification(double progress) async {
     String title = '';
     String subtitle = '';
@@ -248,7 +239,6 @@ class NotificationService {
     );
   }
 
-  // 🟢 إشعارات عشوائية طوال اليوم (للتحفيز المستمر)
   Future<void> addRandomDailyReminder() async {
     List<Map<String, String>> dailyReminders = [
       {
@@ -288,7 +278,6 @@ class NotificationService {
     );
   }
 
-  // تحديد القسم بناءً على التاريخ
   String _getSection(DateTime date) {
     DateTime now = DateTime.now();
     if (date.year == now.year &&
@@ -306,7 +295,6 @@ class NotificationService {
     }
   }
 
-  // 🔹 تحديث جميع الإشعارات كـ مقروءة
   Future<void> markAllAsRead() async {
     String userId = _auth.currentUser!.uid;
 
@@ -320,7 +308,6 @@ class NotificationService {
     for (var doc in snapshot.docs) {
       await doc.reference.update({'isRead': true});
     }
-    // 🟢 إشعار إكمال هدف شرب الماء
     // ignore: unused_element
     Future<void> showGoalAchievedNotification() async {
       await addNotification(

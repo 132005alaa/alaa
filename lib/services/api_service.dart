@@ -4,7 +4,7 @@ import '../models/daily_info.dart';
 
 class ApiService {
   static const String apiUrl =
-      'https://sheet.best/api/sheets/5ee77fdc-123c-47c5-8756-2d4a66ccfdc9';
+      'https://api.sheetbest.com/sheets/a1ede0f8-c911-4d99-9e29-8c0f9e16b5db';
 
   Future<List<DailyInfo>> fetchAllInfo() async {
     try {

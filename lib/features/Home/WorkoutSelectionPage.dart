@@ -15,7 +15,6 @@ class WorkoutSelectionPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
@@ -57,8 +56,6 @@ class WorkoutSelectionPage extends StatelessWidget {
                 ],
               ),
             ),
-
-            // قائمة التمارين
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(
@@ -104,7 +101,6 @@ class _WorkoutCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // صورة التمرين
             Image.asset(
               workout['image'],
               fit: BoxFit.cover,
@@ -117,8 +113,6 @@ class _WorkoutCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // طبقة التعتيم
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -134,8 +128,6 @@ class _WorkoutCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // المحتوى
             Positioned(
               bottom: 0,
               left: 0,

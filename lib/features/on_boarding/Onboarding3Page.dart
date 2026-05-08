@@ -2,115 +2,101 @@ import 'package:flutter/material.dart';
 import 'package:healthy_food/features/authentication/screens/LoginScreen.dart';
 
 class Onboarding3Page extends StatelessWidget {
+  const Onboarding3Page({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 50, right: 20),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: GestureDetector(
-                onTap: () {
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: screenHeight * 0.02),
+            const Spacer(),
+            Image.asset(
+              'assests/onbording3.jpeg',
+              height: screenHeight * 0.35,
+              width: screenWidth * 0.85,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: screenHeight * 0.04),
+            Text(
+              'المياه سر الحياة',
+              style: TextStyle(
+                fontSize: screenWidth * 0.08,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xffB7D957),
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.008),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+              child: Text(
+                'جسمك محتاج ترطيب علشان يفضل\nنشيط وقوي دائما',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.047,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.03),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _dot(Colors.grey.shade300, screenWidth),
+                SizedBox(width: screenWidth * 0.02),
+                _dot(Colors.grey.shade300, screenWidth),
+                SizedBox(width: screenWidth * 0.02),
+                _dot(Colors.grey, screenWidth),
+              ],
+            ),
+            const Spacer(),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: screenHeight * 0.04,
+                left: screenWidth * 0.07,
+                right: screenWidth * 0.07,
+              ),
+              child: ElevatedButton(
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffB7D957),
+                  minimumSize: Size(double.infinity, screenHeight * 0.065),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(screenWidth * 0.08),
+                  ),
+                ),
                 child: Text(
-                  'تخطي',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  'التالي',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-          Spacer(),
-          Image.asset('assests/onbording3.jpeg', height: 300),
-          SizedBox(height: 40),
-          Text(
-            'المياه سر الحياة',
-            style: TextStyle(
-              fontSize: 35,
-              fontWeight: FontWeight.bold,
-              color: Color(0xffB7D957),
-            ),
-          ),
-          SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'جسمك محتاج ترطيب علشان يفضل\nنشيط وقوي دائما',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
-            ),
-          ),
-          SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  shape: BoxShape.circle,
-                ),
-              ),
-              SizedBox(width: 8),
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  shape: BoxShape.circle,
-                ),
-              ),
-              SizedBox(width: 8),
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 50, left: 30, right: 30),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xffB7D957),
-                minimumSize: Size(double.infinity, 55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                'التالي',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _dot(Color color, double screenWidth) {
+    return Container(
+      width: screenWidth * 0.025,
+      height: screenWidth * 0.025,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

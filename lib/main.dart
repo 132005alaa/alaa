@@ -28,20 +28,19 @@ import 'package:healthy_food/services/notification_service.dart';
 void _startNotificationScheduler() {
   Timer.periodic(Duration(hours: 3), (timer) async {
     await NotificationService().addWaterReminderNotification();
-    print('✅ تم إضافة إشعار شرب الماء');
+    print(' تم إضافة إشعار شرب الماء');
   });
 
   Timer.periodic(Duration(hours: 6), (timer) async {
     await NotificationService().addMotivationalNotification();
-    print('✅ تم إضافة إشعار تحفيزي');
+    print(' تم إضافة إشعار تحفيزي');
   });
 
   Timer.periodic(Duration(hours: 24), (timer) async {
     final now = DateTime.now();
     if (now.hour == 17 && now.minute == 0) {
-      // 5 مساءً
       await NotificationService().addWorkoutReminder();
-      print('✅ تم إضافة إشعار تمرين');
+      print(' تم إضافة إشعار تمرين');
     }
   });
 }
@@ -51,13 +50,13 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  print('✅ Firebase initialized successfully');
+  print(' Firebase initialized successfully');
 
   FirebaseAuth.instance.authStateChanges().listen((User? user) {
     if (user == null) {
-      print('👤 User is currently signed out');
+      print(' User is currently signed out');
     } else {
-      print('👤 User is signed in: ${user.email}');
+      print(' User is signed in: ${user.email}');
     }
   });
 

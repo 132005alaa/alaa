@@ -20,33 +20,38 @@ class _GoalPageState extends State<GoalPage> {
     "تثبيت الجسم",
     "زيادة عضلات",
   ];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (userData == null) {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args != null && args is UserData) {
-        setState(() {
-          userData = args;
-        });
+        setState(() => userData = args);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar with back arrow
+            // ── Top bar ──
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.04,
+                vertical: screenHeight * 0.012,
+              ),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.chevron_left, size: 35),
+                    icon: Icon(Icons.chevron_left, size: screenWidth * 0.085),
                     onPressed: () => Navigator.maybePop(context),
                   ),
                 ],
@@ -55,32 +60,35 @@ class _GoalPageState extends State<GoalPage> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 3),
+                    SizedBox(height: screenHeight * 0.005),
 
-                    // Title
-                    const Text(
+                    // ── العنوان ──
+                    Text(
                       "معلومات عنك",
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: screenWidth * 0.07,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
 
-                    const SizedBox(height: 6),
+                    SizedBox(height: screenHeight * 0.006),
 
-                    const Text(
+                    Text(
                       "اعطنا معومات عنك اكثر",
-                      style: TextStyle(fontSize: 20, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        color: Colors.grey,
+                      ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: screenHeight * 0.02),
 
-                    // Progress bar — step 2 of 3 (green covers more)
+                    // ── Progress bar (مكتمل) ──
                     Row(
                       children: [
                         Expanded(
@@ -100,29 +108,32 @@ class _GoalPageState extends State<GoalPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 50),
+                    SizedBox(height: screenHeight * 0.045),
 
-                    // Question
-                    const Text(
+                    // ── السؤال ──
+                    Text(
                       "ما هو هدفك؟",
                       style: TextStyle(
-                        fontSize: 25,
+                        fontSize: screenWidth * 0.058,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    SizedBox(height: screenHeight * 0.025),
 
-                    // Goal options
-                    ...goals.map((goal) => _buildGoalOption(goal)),
+                    // ── خيارات الهدف ──
+                    ...goals.map(
+                      (goal) =>
+                          _buildGoalOption(goal, screenWidth, screenHeight),
+                    ),
 
-                    const SizedBox(height: 60),
+                    SizedBox(height: screenHeight * 0.05),
 
-                    // Button: Next → CongratulationsPage
+                    // ── زرار التالي ──
                     SizedBox(
                       width: double.infinity,
-                      height: 55,
+                      height: screenHeight * 0.065,
                       child: ElevatedButton(
                         onPressed: selectedGoal != null
                             ? () async {
@@ -135,10 +146,8 @@ class _GoalPageState extends State<GoalPage> {
                                   return;
                                 }
 
-                                // تحديث الهدف في كائن المستخدم
                                 userData!.goal = selectedGoal!;
 
-                                // حساب الـ BMR
                                 double bmr = CaloriesCalculator.calculateBMR(
                                   gender: userData!.gender,
                                   age: userData!.age,
@@ -146,23 +155,18 @@ class _GoalPageState extends State<GoalPage> {
                                   weight: userData!.weight,
                                 );
 
-                                // حساب السعرات اليومية حسب الهدف
                                 double dailyCalories =
                                     CaloriesCalculator.calculateDailyCalories(
                                       bmr: bmr,
                                       goal: selectedGoal!,
                                     );
 
-                                // حفظ القيم المحسوبة
                                 userData!.bmr = bmr;
                                 userData!.dailyCalories = dailyCalories;
 
-                                // حفظ البيانات في Firebase
                                 try {
                                   final userDataService = UserDataService();
                                   await userDataService.saveUserData(userData!);
-
-                                  // التنقل لصفحة النتيجة مع تمرير السعرات
                                   Navigator.pushNamed(
                                     context,
                                     '/congrats',
@@ -184,14 +188,16 @@ class _GoalPageState extends State<GoalPage> {
                           backgroundColor: const Color(0xffB7D957),
                           disabledBackgroundColor: const Color(0xffB7D957),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(
+                              screenWidth * 0.08,
+                            ),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child: Text(
                           "اقتربنا",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: screenWidth * 0.048,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -199,7 +205,7 @@ class _GoalPageState extends State<GoalPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    SizedBox(height: screenHeight * 0.03),
                   ],
                 ),
               ),
@@ -210,18 +216,21 @@ class _GoalPageState extends State<GoalPage> {
     );
   }
 
-  Widget _buildGoalOption(String goal) {
+  Widget _buildGoalOption(
+    String goal,
+    double screenWidth,
+    double screenHeight,
+  ) {
     final bool isSelected = selectedGoal == goal;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedGoal = goal;
-        });
-      },
+      onTap: () => setState(() => selectedGoal = goal),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: screenHeight * 0.018,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xffF5F5F5),
           borderRadius: BorderRadius.circular(14),
@@ -232,9 +241,10 @@ class _GoalPageState extends State<GoalPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // ── دايرة الاختيار ──
             Container(
-              width: 22,
-              height: 22,
+              width: screenWidth * 0.055,
+              height: screenWidth * 0.055,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -247,8 +257,8 @@ class _GoalPageState extends State<GoalPage> {
               child: isSelected
                   ? Center(
                       child: Container(
-                        width: 10,
-                        height: 10,
+                        width: screenWidth * 0.025,
+                        height: screenWidth * 0.025,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xff6BAF1A),
@@ -257,10 +267,12 @@ class _GoalPageState extends State<GoalPage> {
                     )
                   : null,
             ),
+
+            // ── النص ──
             Text(
               goal,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: screenWidth * 0.048,
                 fontWeight: FontWeight.w500,
                 color: isSelected ? const Color(0xff6BAF1A) : Colors.black87,
               ),

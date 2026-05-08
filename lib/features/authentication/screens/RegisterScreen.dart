@@ -9,14 +9,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // 1. إضافة الـ Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // 2. متغيرات الحالة
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscurePassword = true;
@@ -24,64 +22,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const SizedBox(height: 60),
-              // زر الرجوع
+              SizedBox(height: screenHeight * 0.07),
+
+              // ── زرار الرجوع ──
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
+                    width: screenWidth * 0.1,
+                    height: screenWidth * 0.1,
+                    decoration: const BoxDecoration(
                       color: Colors.black,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.arrow_back_ios_new,
                       color: Colors.white,
-                      size: 18,
+                      size: screenWidth * 0.045,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
 
-              // العنوان
+              SizedBox(height: screenHeight * 0.035),
+
+              // ── العنوان ──
               Center(
                 child: Text(
                   'انشاء حساب',
                   style: TextStyle(
-                    fontSize: 35,
+                    fontSize: screenWidth * 0.08,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+
+              SizedBox(height: screenHeight * 0.008),
+
               Center(
                 child: Text(
                   'من فضلك سجل الدخول للبدء',
-                  style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045,
+                    color: Colors.grey.shade600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 35),
 
-              // 3. رسالة الخطأ
+              SizedBox(height: screenHeight * 0.03),
+
+              // ── رسالة الخطأ ──
               if (_errorMessage != null)
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(12),
-                  margin: EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.all(screenWidth * 0.03),
+                  margin: EdgeInsets.only(bottom: screenHeight * 0.02),
                   decoration: BoxDecoration(
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(10),
@@ -94,195 +103,111 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
 
-              // الاسم
-              Text(
-                'الاسم',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
+              // ── الاسم ──
+              _buildLabel('الاسم', screenWidth),
+              SizedBox(height: screenHeight * 0.008),
+              _buildTextField(
                 controller: _nameController,
-                textAlign: TextAlign.right,
-                decoration: InputDecoration(
-                  hintText: 'ادخل اسمك',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: 15,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                ),
+                hint: 'ادخل اسمك',
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
               ),
-              const SizedBox(height: 20),
 
-              // البريد الالكتروني
-              Text(
-                'البريد الالكتروني',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
+              SizedBox(height: screenHeight * 0.02),
+
+              // ── البريد الإلكتروني ──
+              _buildLabel('البريد الالكتروني', screenWidth),
+              SizedBox(height: screenHeight * 0.008),
+              _buildTextField(
                 controller: _emailController,
-                textAlign: TextAlign.right,
+                hint: 'email@gmail.com',
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'email@gmail.com',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 15,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                ),
               ),
-              const SizedBox(height: 20),
 
-              // كلمة المرور
-              Text(
-                'كلمه المرور',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
+              SizedBox(height: screenHeight * 0.02),
+
+              // ── كلمة المرور ──
+              _buildLabel('كلمه المرور', screenWidth),
+              SizedBox(height: screenHeight * 0.008),
+              _buildTextField(
                 controller: _passwordController,
+                hint: '************',
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
                 obscureText: _obscurePassword,
-                textAlign: TextAlign.right,
-                decoration: InputDecoration(
-                  hintText: '************',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 15,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: Colors.grey.shade700,
+                    size: screenWidth * 0.055,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: Colors.grey.shade700,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
-              const SizedBox(height: 20),
 
-              // تأكيد كلمة المرور
-              Text(
-                'تأكيد كلمه المرور',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
+              SizedBox(height: screenHeight * 0.02),
+
+              // ── تأكيد كلمة المرور ──
+              _buildLabel('تأكيد كلمه المرور', screenWidth),
+              SizedBox(height: screenHeight * 0.008),
+              _buildTextField(
                 controller: _confirmPasswordController,
+                hint: '************',
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
                 obscureText: _obscureConfirmPassword,
-                textAlign: TextAlign.right,
-                decoration: InputDecoration(
-                  hintText: '************',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 15,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: Colors.grey.shade700,
+                    size: screenWidth * 0.055,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: Colors.grey.shade700,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureConfirmPassword = !_obscureConfirmPassword;
-                      });
-                    },
+                  onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
                   ),
                 ),
               ),
-              const SizedBox(height: 80),
 
-              // زر تسجيل
+              SizedBox(height: screenHeight * 0.07),
+
+              // ── زرار التسجيل ──
               SizedBox(
                 width: double.infinity,
                 child: _isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                         onPressed: _register,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff9ACD32),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.02,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(
+                              screenWidth * 0.08,
+                            ),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child: Text(
                           'سجل الان',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: screenWidth * 0.048,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                         ),
                       ),
               ),
-              const SizedBox(height: 40),
+
+              SizedBox(height: screenHeight * 0.04),
             ],
           ),
         ),
@@ -290,41 +215,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // 4. دالة التسجيل
+  Widget _buildLabel(String text, double screenWidth) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: screenWidth * 0.045,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required double screenWidth,
+    required double screenHeight,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      textAlign: TextAlign.right,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: screenWidth * 0.038,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade300,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.05,
+          vertical: screenHeight * 0.02,
+        ),
+        suffixIcon: suffixIcon,
+      ),
+    );
+  }
+
   Future<void> _register() async {
-    // التحقق من الحقول
     if (_nameController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'من فضلك أدخل الاسم';
-      });
+      setState(() => _errorMessage = 'من فضلك أدخل الاسم');
       return;
     }
-
     if (_emailController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'من فضلك أدخل البريد الإلكتروني';
-      });
+      setState(() => _errorMessage = 'من فضلك أدخل البريد الإلكتروني');
       return;
     }
-
     if (_passwordController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'من فضلك أدخل كلمة المرور';
-      });
+      setState(() => _errorMessage = 'من فضلك أدخل كلمة المرور');
       return;
     }
-
     if (_passwordController.text.length < 6) {
-      setState(() {
-        _errorMessage = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-      });
+      setState(
+        () => _errorMessage = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+      );
       return;
     }
-
     if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _errorMessage = 'كلمة المرور غير متطابقة';
-      });
+      setState(() => _errorMessage = 'كلمة المرور غير متطابقة');
       return;
     }
 
@@ -334,27 +291,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // 5. إنشاء حساب جديد في Firebase
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
-
-      // 6. تحديث الاسم (Display Name)
       if (userCredential.user != null) {
         await userCredential.user!.updateDisplayName(
           _nameController.text.trim(),
         );
         await userCredential.user!.reload();
-
-        // 7. إرسال بريد التفعيل
         await userCredential.user!.sendEmailVerification();
-
-        // 8. الانتقال لصفحة النجاح
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/success');
-        }
+        if (mounted) Navigator.pushReplacementNamed(context, '/success');
       }
     } on FirebaseAuthException catch (e) {
       String message = '';
@@ -374,17 +322,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         default:
           message = 'حدث خطأ: ${e.message}';
       }
-      setState(() {
-        _errorMessage = message;
-      });
+      setState(() => _errorMessage = message);
     } catch (e) {
-      setState(() {
-        _errorMessage = 'حدث خطأ غير متوقع';
-      });
+      setState(() => _errorMessage = 'حدث خطأ غير متوقع');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

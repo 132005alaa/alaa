@@ -17,6 +17,8 @@ import 'package:healthy_food/services/notification_service.dart';
 import 'package:healthy_food/features/profile/SleepInputPage.dart';
 import 'package:healthy_food/features/profile/StepsInputPage.dart';
 import 'package:healthy_food/services/meal_tracking_service.dart';
+import 'package:healthy_food/core/utils/shared_preferences_helper.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   int _totalCalories = 0;
   int _dailyGoal = 0;
   int _burnedCalories = 0;
+  String? _profileImagePath;
   final WorkoutTrackingService _workoutService = WorkoutTrackingService();
 
   List<Map<String, String>> days = [];
@@ -72,7 +75,7 @@ class _HomePageState extends State<HomePage> {
           'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200',
     },
   ];
-  // جلب بيانات المستخدم من Firebase
+
   Future<void> _loadUserData() async {
     try {
       final userDataService = UserDataService();
@@ -88,7 +91,7 @@ class _HomePageState extends State<HomePage> {
         if (data != null) {
           setState(() {
             userData = data;
-            _dailyGoal = (data.dailyCalories ?? 0).toInt(); // 👈 مهم
+            _dailyGoal = (data.dailyCalories ?? 0).toInt();
           });
         }
       }
@@ -113,17 +116,38 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _refreshProfileData() async {
+    final path = await SharedPreferencesHelper.getProfileImagePath();
+    final user = FirebaseAuth.instance.currentUser;
+    await user?.reload();
+    final freshUser = FirebaseAuth.instance.currentUser;
+    setState(() {
+      _profileImagePath = path;
+      if (freshUser != null) {
+        _userName =
+            freshUser.displayName ??
+            freshUser.email?.split('@').first ??
+            'مستخدم';
+      }
+    });
+  }
+
+  Future<void> _loadProfileImage() async {
+    final path = await SharedPreferencesHelper.getProfileImagePath();
+    setState(() {
+      _profileImagePath = path;
+    });
+  }
+
   void _listenToBurnedCalories() {
     _workoutService.getTodayWorkoutCaloriesStream().listen((calories) {
       if (!mounted) return;
-
       setState(() {
         _burnedCalories = calories;
       });
     });
   }
 
-  // توليد أيام الأسبوع
   void _generateDaysOfWeek() {
     DateTime now = DateTime.now();
     _currentMonth = _getMonthName(now.month);
@@ -202,7 +226,6 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  // تحويل رقم الشهر لاسم عربي
   String _getMonthName(int month) {
     const months = [
       'يناير',
@@ -229,6 +252,7 @@ class _HomePageState extends State<HomePage> {
     _loadUnreadCount();
     _loadTodayCalories();
     _listenToBurnedCalories();
+    _loadProfileImage();
   }
 
   void _loadUnreadCount() {
@@ -241,25 +265,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final heroHeight = screenHeight * 0.28;
+    final sectionPadding = screenWidth * 0.05;
+    final verticalGap = screenHeight * 0.018;
+
     return Scaffold(
       backgroundColor: Colors.white,
       bottomNavigationBar: _buildBottomNav(),
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header — fixed, NOT scrollable ──
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: sectionPadding,
+                vertical: screenHeight * 0.014,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
                     onTap: () async {
                       setState(() => notificationOpened = true);
-
-                      // 👈 نخلي كل الإشعارات مقروءة قبل الانتقال
                       await NotificationService().markAllAsRead();
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -275,7 +304,7 @@ class _HomePageState extends State<HomePage> {
                             notificationOpened
                                 ? Icons.notifications
                                 : Icons.notifications_outlined,
-                            size: 28,
+                            size: 26,
                           ),
                         ),
                         if (_unreadCount > 0)
@@ -312,26 +341,35 @@ class _HomePageState extends State<HomePage> {
                         _isLoading
                             ? 'جاري التحميل...'
                             : 'صباح الخير، $_userName',
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.043,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: screenWidth * 0.025),
                       CircleAvatar(
-                        radius: 25,
-                        backgroundImage: NetworkImage(
-                          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
-                        ),
+                        radius: screenWidth * 0.058,
+                        backgroundImage: _profileImagePath != null
+                            ? FileImage(File(_profileImagePath!))
+                            : const NetworkImage(
+                                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
+                                  )
+                                  as ImageProvider,
+                        backgroundColor: Colors.grey.shade200,
+                        child: _profileImagePath == null
+                            ? Icon(
+                                Icons.person,
+                                color: const Color(0xff6BAF1A),
+                                size: screenWidth * 0.055,
+                              )
+                            : null,
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // ── Everything below scrolls ──
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -344,15 +382,15 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(30),
                           child: Image.network(
                             'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
-                            height: 280,
+                            height: heroHeight,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
                         ),
                         Positioned(
-                          bottom: 16,
-                          left: 16,
-                          right: 16,
+                          bottom: 12,
+                          left: 12,
+                          right: 12,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(days.length, (index) {
@@ -361,30 +399,30 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () =>
                                     setState(() => selectedDayIndex = index),
                                 child: Container(
-                                  width: 46,
+                                  width: (screenWidth - 24) / 7 - 4,
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
+                                    vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.9),
-                                    borderRadius: BorderRadius.circular(14),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Column(
                                     children: [
                                       Text(
                                         days[index]['day']!,
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: screenWidth * 0.032,
                                           fontWeight: FontWeight.w600,
                                           color: isSelected
                                               ? const Color(0xff6BAF1A)
                                               : Colors.black87,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 3),
                                       Container(
-                                        width: 30,
-                                        height: 30,
+                                        width: 26,
+                                        height: 26,
                                         decoration: BoxDecoration(
                                           color: isSelected
                                               ? const Color(0xff6BAF1A)
@@ -395,7 +433,7 @@ class _HomePageState extends State<HomePage> {
                                           child: Text(
                                             days[index]['num']!,
                                             style: TextStyle(
-                                              fontSize: 15,
+                                              fontSize: screenWidth * 0.03,
                                               fontWeight: FontWeight.bold,
                                               color: isSelected
                                                   ? Colors.white
@@ -413,12 +451,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Month row ──
+                    SizedBox(height: verticalGap),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: sectionPadding),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -436,17 +471,16 @@ class _HomePageState extends State<HomePage> {
                                 });
                               }
                             },
-
-                            child: Icon(
+                            child: const Icon(
                               Icons.calendar_month,
-                              color: const Color(0xff6BAF1A),
-                              size: 28,
+                              color: Color(0xff6BAF1A),
+                              size: 26,
                             ),
                           ),
                           Text(
                             _currentMonth,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.052,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -454,12 +488,12 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // الكارد بتاع السعرات
+                    SizedBox(height: verticalGap),
+                    // ── كارد السعرات ──
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: sectionPadding * 1.1,
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
                           color: const Color(0xffD6EFA0),
@@ -473,10 +507,10 @@ class _HomePageState extends State<HomePage> {
                         child: Row(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(20),
+                              padding: EdgeInsets.all(screenWidth * 0.035),
                               child: Container(
-                                width: 115,
-                                height: 115,
+                                width: screenWidth * 0.24,
+                                height: screenWidth * 0.24,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
@@ -489,27 +523,27 @@ class _HomePageState extends State<HomePage> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'الاكل',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: screenWidth * 0.032,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xff2D5A0E),
+                                          color: const Color(0xff2D5A0E),
                                         ),
                                       ),
                                       Text(
                                         '$_dailyGoal',
-                                        style: const TextStyle(
-                                          fontSize: 24,
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.048,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xff2D5A0E),
+                                          color: const Color(0xff2D5A0E),
                                         ),
                                       ),
-                                      const Text(
+                                      Text(
                                         'سعرة',
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xff2D5A0E),
+                                          fontSize: screenWidth * 0.026,
+                                          color: const Color(0xff2D5A0E),
                                         ),
                                       ),
                                     ],
@@ -518,44 +552,48 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             const Spacer(),
-                            Flexible(
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: screenWidth * 0.035,
+                                horizontal: screenWidth * 0.03,
+                              ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildStatRow(
                                     'الاكل',
                                     '$_totalCalories سعرة',
                                     '🍜',
                                     const Color(0xff8BC34A),
+                                    screenWidth,
                                   ),
-                                  const SizedBox(height: 26),
+                                  SizedBox(height: screenHeight * 0.025),
                                   _buildStatRow(
                                     'الحرق',
                                     '$_burnedCalories سعرة',
                                     '🔥',
                                     const Color(0xffFF7043),
+                                    screenWidth,
                                   ),
                                 ],
                               ),
                             ),
-                            const Spacer(),
-                            SizedBox(
+                            Container(
                               width: 8,
-                              height: 115,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  ),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0xff8BC34A),
-                                      Color(0xffFF7043),
-                                    ],
-                                  ),
+                              height: screenWidth * 0.38,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
+                                ),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xff8BC34A),
+                                    Color(0xffFF7043),
+                                  ],
                                 ),
                               ),
                             ),
@@ -563,16 +601,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    //  كارتا النوم والخطوات
+                    SizedBox(height: verticalGap),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: sectionPadding),
                       child: Row(
                         children: [
-                          // ── كارد النوم ──
-                          // ── كارد النوم ──
+                          // كارد النوم
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
@@ -588,9 +622,9 @@ class _HomePageState extends State<HomePage> {
                                 }
                               },
                               child: Container(
-                                height: 140,
+                                height: screenHeight * 0.165,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(22),
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -602,17 +636,16 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Color(
+                                      color: const Color(
                                         0xff2D2B6B,
-                                      ).withOpacity(0.45),
-                                      blurRadius: 18,
-                                      offset: const Offset(0, 8),
+                                      ).withOpacity(0.4),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
                                 child: Stack(
                                   children: [
-                                    // النجوم الزخرفية (سيبيها زي ما هي)
                                     Positioned(
                                       top: 10,
                                       left: 14,
@@ -636,32 +669,21 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     Positioned(
-                                      top: 14,
-                                      left: 48,
-                                      child: Text(
-                                        '✦',
-                                        style: TextStyle(
-                                          fontSize: 5,
-                                          color: Colors.white.withOpacity(0.3),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
                                       top: -18,
                                       left: -18,
                                       child: Container(
-                                        width: 80,
-                                        height: 80,
+                                        width: 70,
+                                        height: 70,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Colors.white.withOpacity(0.05),
                                         ),
                                       ),
                                     ),
-
-                                    // المحتوى
                                     Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: EdgeInsets.all(
+                                        screenWidth * 0.035,
+                                      ),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
@@ -672,18 +694,18 @@ class _HomePageState extends State<HomePage> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 'النوم',
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: screenWidth * 0.038,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 6),
                                               Container(
                                                 padding: const EdgeInsets.all(
-                                                  6,
+                                                  5,
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: Colors.white
@@ -691,31 +713,30 @@ class _HomePageState extends State<HomePage> {
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                 ),
-                                                child: const Text(
+                                                child: Text(
                                                   '🌙',
                                                   style: TextStyle(
-                                                    fontSize: 18,
+                                                    fontSize:
+                                                        screenWidth * 0.04,
                                                   ),
                                                 ),
                                               ),
                                             ],
                                           ),
-
                                           Align(
                                             alignment: Alignment.centerRight,
                                             child: Text(
                                               userData?.sleepHours != null
                                                   ? '${userData!.sleepHours!.toStringAsFixed(1)}'
                                                   : '--:--',
-                                              style: const TextStyle(
-                                                fontSize: 32,
+                                              style: TextStyle(
+                                                fontSize: screenWidth * 0.072,
                                                 fontWeight: FontWeight.w800,
                                                 color: Colors.white,
                                                 height: 1,
                                               ),
                                             ),
                                           ),
-
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
@@ -727,8 +748,8 @@ class _HomePageState extends State<HomePage> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
-                                                    width: 70,
-                                                    height: 5,
+                                                    width: 60,
+                                                    height: 4,
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
@@ -762,10 +783,10 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ],
                                               ),
-                                              const Text(
+                                              Text(
                                                 'ساعة يومياً',
                                                 style: TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: screenWidth * 0.027,
                                                   color: Colors.white60,
                                                 ),
                                               ),
@@ -780,9 +801,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
 
-                          const SizedBox(width: 14),
+                          SizedBox(width: screenWidth * 0.03),
 
-                          // ── كارد الخطوات ──
+                          // كارد الخطوات
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
@@ -798,9 +819,9 @@ class _HomePageState extends State<HomePage> {
                                 }
                               },
                               child: Container(
-                                height: 140,
+                                height: screenHeight * 0.165,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(22),
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -814,43 +835,30 @@ class _HomePageState extends State<HomePage> {
                                     BoxShadow(
                                       color: const Color(
                                         0xffFF6B1A,
-                                      ).withOpacity(0.45),
-                                      blurRadius: 18,
-                                      offset: const Offset(0, 8),
+                                      ).withOpacity(0.4),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
                                 child: Stack(
                                   children: [
-                                    // دوائر زخرفية
                                     Positioned(
                                       bottom: -20,
                                       left: -20,
                                       child: Container(
-                                        width: 90,
-                                        height: 90,
+                                        width: 80,
+                                        height: 80,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Colors.white.withOpacity(0.08),
                                         ),
                                       ),
                                     ),
-                                    Positioned(
-                                      bottom: 10,
-                                      left: 30,
-                                      child: Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white.withOpacity(0.06),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // المحتوى
                                     Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: EdgeInsets.all(
+                                        screenWidth * 0.035,
+                                      ),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
@@ -861,18 +869,18 @@ class _HomePageState extends State<HomePage> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 'الخطوات',
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: screenWidth * 0.038,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 6),
                                               Container(
                                                 padding: const EdgeInsets.all(
-                                                  6,
+                                                  5,
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: Colors.white
@@ -880,31 +888,30 @@ class _HomePageState extends State<HomePage> {
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                 ),
-                                                child: const Text(
+                                                child: Text(
                                                   '👟',
                                                   style: TextStyle(
-                                                    fontSize: 18,
+                                                    fontSize:
+                                                        screenWidth * 0.04,
                                                   ),
                                                 ),
                                               ),
                                             ],
                                           ),
-
                                           Align(
                                             alignment: Alignment.centerRight,
                                             child: Text(
                                               userData?.steps != null
                                                   ? '${userData!.steps}'
                                                   : '0',
-                                              style: const TextStyle(
-                                                fontSize: 30,
+                                              style: TextStyle(
+                                                fontSize: screenWidth * 0.068,
                                                 fontWeight: FontWeight.w800,
                                                 color: Colors.white,
                                                 height: 1,
                                               ),
                                             ),
                                           ),
-
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
@@ -916,8 +923,8 @@ class _HomePageState extends State<HomePage> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
-                                                    width: 70,
-                                                    height: 5,
+                                                    width: 60,
+                                                    height: 4,
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
@@ -949,10 +956,10 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ],
                                               ),
-                                              const Text(
+                                              Text(
                                                 'من 10,000',
                                                 style: TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: screenWidth * 0.027,
                                                   color: Colors.white70,
                                                 ),
                                               ),
@@ -970,36 +977,39 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: verticalGap),
 
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: sectionPadding),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           'الطعام',
                           style: TextStyle(
-                            fontSize: 25,
+                            fontSize: screenWidth * 0.058,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xffE57373),
+                            color: const Color(0xffE57373),
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: verticalGap * 0.7),
 
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: sectionPadding * 0.8,
+                      ),
                       itemCount: meals.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, __) =>
+                          SizedBox(height: verticalGap * 0.7),
                       itemBuilder: (context, index) =>
-                          _buildMealCard(meals[index]),
+                          _buildMealCard(meals[index], screenWidth),
                     ),
 
-                    const SizedBox(height: 30),
+                    SizedBox(height: verticalGap * 1.5),
                   ],
                 ),
               ),
@@ -1015,24 +1025,13 @@ class _HomePageState extends State<HomePage> {
     String value,
     String emoji,
     Color barColor,
+    double screenWidth,
   ) {
-    // حساب نسبة التقدم حسب الهدف
-
-    // ignore: unused_local_variable
-    double progress = 0.0;
-    if (label == 'الاكل' && userData != null) {
-      // هنا تقدري تحسبي نسبة الأكل بناءً على السعرات المتناولة
-      // مؤقتاً هنخليها صفر
-      progress = 0.0;
-    } else if (label == 'الحرق' && userData != null) {
-      progress = 0.0;
-    }
-
     return Row(
       children: [
         Container(
           width: 4,
-          height: 42,
+          height: 40,
           decoration: BoxDecoration(
             color: barColor,
             borderRadius: BorderRadius.circular(4),
@@ -1044,25 +1043,28 @@ class _HomePageState extends State<HomePage> {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.bold,
-                color: Color(0xff2D5A0E),
+                color: const Color(0xff2D5A0E),
               ),
             ),
             Text(
               value,
-              style: const TextStyle(fontSize: 15, color: Colors.black54),
+              style: TextStyle(
+                fontSize: screenWidth * 0.034,
+                color: Colors.black54,
+              ),
             ),
           ],
         ),
         const SizedBox(width: 6),
-        Text(emoji, style: const TextStyle(fontSize: 22)),
+        Text(emoji, style: TextStyle(fontSize: screenWidth * 0.05)),
       ],
     );
   }
 
-  Widget _buildMealCard(Map<String, dynamic> meal) {
+  Widget _buildMealCard(Map<String, dynamic> meal, double screenWidth) {
     return GestureDetector(
       onTap: () async {
         if (meal['title'] == 'الفطار') {
@@ -1072,7 +1074,6 @@ class _HomePageState extends State<HomePage> {
           );
           _loadTodayCalories();
         }
-
         if (meal['title'] == 'الغداء') {
           await Navigator.push(
             context,
@@ -1109,7 +1110,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(screenWidth * 0.028),
         decoration: BoxDecoration(
           color: const Color(0xffEEF7CC),
           borderRadius: BorderRadius.circular(18),
@@ -1120,34 +1121,37 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(14),
               child: Image.network(
                 meal['image'],
-                width: 80,
-                height: 80,
+                width: screenWidth * 0.185,
+                height: screenWidth * 0.185,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  width: 80,
-                  height: 80,
+                  width: screenWidth * 0.185,
+                  height: screenWidth * 0.185,
                   color: Colors.grey.shade200,
                   child: const Icon(Icons.restaurant, color: Colors.grey),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: screenWidth * 0.038),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     meal['title'],
-                    style: const TextStyle(
-                      fontSize: 23,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.052,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xff2D5A0E),
+                      color: const Color(0xff2D5A0E),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     meal['subtitle'],
-                    style: const TextStyle(fontSize: 15, color: Colors.black54),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.034,
+                      color: Colors.black54,
+                    ),
                     textDirection: TextDirection.rtl,
                   ),
                 ],
@@ -1160,9 +1164,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBottomNav() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final iconSize = screenWidth * 0.068;
+    final navItems = [
+      {'icon': Icons.home_filled, 'index': 0, 'page': null},
+      {'icon': Icons.bar_chart_outlined, 'index': 1, 'page': 'analysis'},
+      {'icon': Icons.water_drop_outlined, 'index': 2, 'page': 'water'},
+      {'icon': Icons.info_outlined, 'index': 3, 'page': 'info'},
+      {'icon': Icons.person_outline, 'index': 4, 'page': 'settings'},
+    ];
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: EdgeInsets.fromLTRB(
+        screenWidth * 0.04,
+        0,
+        screenWidth * 0.04,
+        screenWidth * 0.038,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.04,
+        vertical: screenWidth * 0.028,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -1176,131 +1198,67 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Home - active
-          GestureDetector(
-            onTap: () => setState(() => currentIndex = 0),
+        children: navItems.map((item) {
+          final idx = item['index'] as int;
+          final isActive = currentIndex == idx;
+          return GestureDetector(
+            onTap: () async {
+              setState(() => currentIndex = idx);
+              switch (item['page']) {
+                case 'analysis':
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AnalysisPage(
+                        sleepHours: userData?.sleepHours,
+                        steps: userData?.steps,
+                        calories: _totalCalories,
+                        burnedCalories: _burnedCalories,
+                        dailyGoal: _dailyGoal,
+                      ),
+                    ),
+                  );
+                  break;
+                case 'water':
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WaterPage()),
+                  );
+                  break;
+                case 'info':
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InfoTipsPage(),
+                    ),
+                  );
+                  break;
+                case 'settings':
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsPage(),
+                    ),
+                  );
+                  await _refreshProfileData();
+                  break;
+              }
+              if (mounted) setState(() => currentIndex = 0);
+            },
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(screenWidth * 0.022),
               decoration: BoxDecoration(
-                color: currentIndex == 0
-                    ? const Color(0xffD6EFA0)
-                    : Colors.transparent,
+                color: isActive ? const Color(0xffD6EFA0) : Colors.transparent,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.home_filled,
-                color: currentIndex == 0
-                    ? const Color(0xff6BAF1A)
-                    : Colors.black54,
-                size: 30,
+                item['icon'] as IconData,
+                color: isActive ? const Color(0xff6BAF1A) : Colors.black54,
+                size: iconSize,
               ),
             ),
-          ),
-          // Chart icon → AnalysisPage
-          // Chart icon → AnalysisPage (مع تمرير البيانات)
-          GestureDetector(
-            onTap: () {
-              setState(() => currentIndex = 1);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AnalysisPage(
-                    sleepHours: userData?.sleepHours,
-                    steps: userData?.steps,
-                    calories: _totalCalories,
-                    burnedCalories: _burnedCalories,
-                    dailyGoal: _dailyGoal,
-                    // protein: _totalProtein,  // لو عندك بروتين مستقبلاً
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: currentIndex == 1
-                    ? const Color(0xffD6EFA0)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.bar_chart_outlined,
-                color: currentIndex == 1
-                    ? const Color(0xff6BAF1A)
-                    : Colors.black54,
-                size: 30,
-              ),
-            ),
-          ), // Water icon
-          GestureDetector(
-            onTap: () {
-              setState(() => currentIndex = 2);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WaterPage()),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: currentIndex == 2
-                    ? const Color(0xffD6EFA0)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.water_drop_outlined,
-                color: currentIndex == 2
-                    ? const Color(0xff6BAF1A)
-                    : Colors.black54,
-                size: 30,
-              ),
-            ),
-          ),
-          // Info icon navigates to InfoTipsPage
-          GestureDetector(
-            onTap: () {
-              setState(() => currentIndex = 3);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const InfoTipsPage()),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: currentIndex == 3
-                    ? const Color(0xffD6EFA0)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.info_outlined,
-                color: currentIndex == 3
-                    ? const Color(0xff6BAF1A)
-                    : Colors.black54,
-                size: 30,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: const Icon(
-                Icons.person_outline,
-                size: 30,
-                color: Colors.black54,
-              ),
-            ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }

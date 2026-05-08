@@ -14,19 +14,15 @@ class UserDataService {
         throw Exception("المستخدم مش مسجل دخول");
       }
 
-      await _firestore
-          .collection('users')
-          .doc(user.uid) // 👈 الصح هنا
-          .set(userData.toMap());
+      await _firestore.collection('users').doc(user.uid).set(userData.toMap());
 
-      print('✅ تم حفظ البيانات بنجاح');
+      print(' تم حفظ البيانات بنجاح');
     } catch (e) {
-      print('❌ خطأ في حفظ البيانات: $e');
+      print(' خطأ في حفظ البيانات: $e');
       rethrow;
     }
   }
 
-  // جلب بيانات المستخدم
   Future<UserData?> getUserData() async {
     try {
       final user = _auth.currentUser;
@@ -43,7 +39,7 @@ class UserDataService {
       }
       return null;
     } catch (e) {
-      print('❌ خطأ في جلب البيانات: $e');
+      print(' خطأ في جلب البيانات: $e');
       return null;
     }
   }
@@ -55,9 +51,9 @@ class UserDataService {
           .collection('users')
           .doc(userData.userId)
           .update(userData.toMap());
-      print('✅ تم تحديث البيانات بنجاح');
+      print(' تم تحديث البيانات بنجاح');
     } catch (e) {
-      print('❌ خطأ في تحديث البيانات: $e');
+      print(' خطأ في تحديث البيانات: $e');
       rethrow;
     }
   }

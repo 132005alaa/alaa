@@ -27,10 +27,8 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
 
   Future<void> _loadUserData() async {
     try {
-      // جلب البيانات من Firebase
       final userDataService = UserDataService();
       UserData? userData = await userDataService.getUserData();
-
       if (userData != null && userData.dailyCalories != null) {
         setState(() {
           _calories = userData.dailyCalories!.round();
@@ -38,7 +36,6 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
           _isLoading = false;
         });
       } else {
-        // ✅ دلوقتي ModalRoute.of(context) هيشتغل صح لأننا في didChangeDependencies
         final args = ModalRoute.of(context)?.settings.arguments;
         if (args != null && args is Map<String, dynamic>) {
           setState(() {
@@ -47,118 +44,135 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
             _isLoading = false;
           });
         } else {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
         }
       }
     } catch (e) {
       print('Error loading user data: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: screenHeight * 0.04),
 
-                    // Title
-                    const Text(
-                      "تهانينا",
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  // العنوان
+                  Text(
+                    "تهانينا",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.08,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
+                  ),
 
-                    const SizedBox(height: 8),
+                  SizedBox(height: screenHeight * 0.008),
 
-                    const Text(
-                      "! لقد اعدتنا لك نظامك الغذائي ",
-                      style: TextStyle(fontSize: 20, color: Colors.grey),
+                  Text(
+                    "! لقد اعدتنا لك نظامك الغذائي",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
+                      color: Colors.grey,
                     ),
+                  ),
 
-                    const SizedBox(height: 40),
+                  SizedBox(height: screenHeight * 0.035),
 
-                    // Circular calories chart
-                    SizedBox(
-                      width: 220,
-                      height: 220,
-                      child: CustomPaint(
-                        painter: _CalorieRingPainter(),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text("🔥", style: TextStyle(fontSize: 32)),
-                              const SizedBox(height: 6),
-                              Text(
-                                "$_calories",
-                                style: const TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                  // دايرة السعرات
+                  SizedBox(
+                    width: screenWidth * 0.52,
+                    height: screenWidth * 0.52,
+                    child: CustomPaint(
+                      painter: _CalorieRingPainter(),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "🔥",
+                              style: TextStyle(fontSize: screenWidth * 0.07),
+                            ),
+                            SizedBox(height: screenHeight * 0.005),
+                            Text(
+                              "$_calories",
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.08,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
-                              const Text(
-                                "يوم / كالوري",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black54,
-                                ),
+                            ),
+                            Text(
+                              "يوم / كالوري",
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.032,
+                                color: Colors.black54,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 40),
+                  SizedBox(height: screenHeight * 0.03),
 
-                    // Legend row
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildLegendItem(
-                            color: const Color(0xff4A7C2F),
-                            label: "دهون",
-                            percent: _getFatPercent(),
-                          ),
-                          _buildLegendItem(
-                            color: const Color(0xffB5D97A),
-                            label: "بروتين",
-                            percent: _getProteinPercent(),
-                          ),
-                          _buildLegendItem(
-                            color: const Color(0xff7CAF3A),
-                            label: "كربوهيدرات",
-                            percent: _getCarbsPercent(),
-                          ),
-                        ],
-                      ),
+                  // Legend
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.06,
                     ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildLegendItem(
+                          color: const Color(0xff4A7C2F),
+                          label: "دهون",
+                          percent: _getFatPercent(),
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                        ),
+                        _buildLegendItem(
+                          color: const Color(0xffB5D97A),
+                          label: "بروتين",
+                          percent: _getProteinPercent(),
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                        ),
+                        _buildLegendItem(
+                          color: const Color(0xff7CAF3A),
+                          label: "كربوهيدرات",
+                          percent: _getCarbsPercent(),
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                        ),
+                      ],
+                    ),
+                  ),
 
-                    const SizedBox(height: 40),
+                  SizedBox(height: screenHeight * 0.03),
 
-                    // Green card at the bottom
-                    Container(
+                  // ✅ الكارد الأخضر بـ Expanded يملا المساحة الباقية لتحت
+                  Expanded(
+                    child: Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 0),
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 30),
+                      padding: EdgeInsets.fromLTRB(
+                        screenWidth * 0.06,
+                        screenHeight * 0.03,
+                        screenWidth * 0.06,
+                        screenHeight * 0.035,
+                      ),
                       decoration: const BoxDecoration(
                         color: Color(0xffD6EFA0),
                         borderRadius: BorderRadius.only(
@@ -167,66 +181,62 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
                         ),
                       ),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             "حافظ علي توازنك",
                             style: TextStyle(
-                              fontSize: 30,
+                              fontSize: screenWidth * 0.07,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xff410B0B),
+                              color: const Color(0xff410B0B),
                             ),
                             textDirection: TextDirection.rtl,
                           ),
 
-                          const SizedBox(height: 10),
+                          SizedBox(height: screenHeight * 0.01),
 
-                          const Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "التغيير مش في يوم....لكن كل يوم",
-                              style: TextStyle(
-                                fontSize: 23,
-                                color: Color.fromARGB(255, 93, 92, 92),
-                              ),
-                              textDirection: TextDirection.rtl,
+                          Text(
+                            "التغيير مش في يوم....لكن كل يوم",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.048,
+                              color: const Color.fromARGB(255, 93, 92, 92),
                             ),
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.center,
                           ),
 
-                          const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.02),
 
-                          const Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "🌱🌱🌱🌱🌱🌱 ",
-                              style: TextStyle(fontSize: 45),
-                            ),
+                          Text(
+                            "🌱🌱🌱🌱🌱🌱",
+                            style: TextStyle(fontSize: screenWidth * 0.1),
                           ),
 
-                          const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.025),
 
-                          // Start button
+                          // زرار لنبدأ
                           SizedBox(
                             width: double.infinity,
-                            height: 55,
+                            height: screenHeight * 0.065,
                             child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  '/home',
-                                );
-                              },
+                              onPressed: () => Navigator.pushReplacementNamed(
+                                context,
+                                '/home',
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xff6BAF1A),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.08,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "لنبدا",
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: screenWidth * 0.048,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -236,60 +246,50 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
       ),
     );
   }
 
   String _getFatPercent() {
-    if (_goal == 'خسارة وزن') {
-      return "(30%)";
-    } else if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') {
-      return "(25%)";
-    } else {
-      return "(30%)";
-    }
+    if (_goal == 'خسارة وزن') return "(30%)";
+    if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') return "(25%)";
+    return "(30%)";
   }
 
   String _getProteinPercent() {
-    if (_goal == 'خسارة وزن') {
-      return "(40%)";
-    } else if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') {
-      return "(35%)";
-    } else {
-      return "(30%)";
-    }
+    if (_goal == 'خسارة وزن') return "(40%)";
+    if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') return "(35%)";
+    return "(30%)";
   }
 
   String _getCarbsPercent() {
-    if (_goal == 'خسارة وزن') {
-      return "(30%)";
-    } else if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') {
-      return "(40%)";
-    } else {
-      return "(40%)";
-    }
+    if (_goal == 'خسارة وزن') return "(30%)";
+    if (_goal == 'زيادة عضلات' || _goal == 'زيادة وزن') return "(40%)";
+    return "(40%)";
   }
 
   Widget _buildLegendItem({
     required Color color,
     required String label,
     required String percent,
+    required double screenWidth,
+    required double screenHeight,
   }) {
     return Column(
       children: [
         Container(
-          width: 18,
-          height: 18,
+          width: screenWidth * 0.045,
+          height: screenWidth * 0.045,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: screenHeight * 0.008),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 20,
+          style: TextStyle(
+            fontSize: screenWidth * 0.038,
             color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
@@ -297,7 +297,10 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
         ),
         Text(
           percent,
-          style: const TextStyle(fontSize: 20, color: Colors.black54),
+          style: TextStyle(
+            fontSize: screenWidth * 0.035,
+            color: Colors.black54,
+          ),
         ),
       ],
     );

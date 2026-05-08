@@ -1,5 +1,4 @@
 class CaloriesCalculator {
-  // حساب معدل الحرق الأساسي (BMR)
   static double calculateBMR({
     required String gender,
     required int age,
@@ -7,35 +6,30 @@ class CaloriesCalculator {
     required double weight, // kg
   }) {
     if (gender == 'ذكر') {
-      // معادلة الرجال
       return 66 + (13.7 * weight) + (5 * height) - (6.8 * age);
     } else {
-      // معادلة النساء
       return 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
     }
   }
 
-  // حساب السعرات حسب الهدف
   static double calculateDailyCalories({
     required double bmr,
     required String goal,
   }) {
     if (goal == 'خسارة وزن') {
-      return bmr - 500; // تخسيس
+      return bmr - 500;
     } else if (goal == 'زيادة عضلات' || goal == 'زيادة وزن') {
-      return bmr + 500; // زيادة
+      return bmr + 500;
     } else {
-      return bmr; // تثبيت
+      return bmr;
     }
   }
 
-  // حساب الـ BMI (اختياري)
   static double calculateBMI({required double weight, required double height}) {
     double heightInMeters = height / 100;
     return weight / (heightInMeters * heightInMeters);
   }
 
-  // تفسير الـ BMI
   static String interpretBMI(double bmi) {
     if (bmi < 18.5) return 'نحافة';
     if (bmi < 25) return 'وزن طبيعي';

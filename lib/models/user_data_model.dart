@@ -1,22 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserData {
-  String userId; // id بتاع المستخدم من Firebase
-  String gender; // ذكر / أنثى
-  int age; // العمر
-  double height; // الطول (cm)
-  double weight; // الوزن (kg)
-  String goal; // الهدف: خسارة وزن / زيادة عضلات / تثبيت
-  double? bmr; // معدل الحرق الأساسي (هيحسبه البرنامج)
-  double? dailyCalories; // السعرات اليومية (هتحسب)
+  String userId;
+  String gender;
+  int age;
+  double height;
+  double weight;
+  String goal;
+  double? bmr;
+  double? dailyCalories;
 
-  //  حقول النوم
-  double? sleepHours; // عدد ساعات النوم
-  DateTime? lastSleepUpdate; // تاريخ آخر تحديث للنوم
+  double? sleepHours;
+  DateTime? lastSleepUpdate;
 
-  //  حقول الخطوات
-  int? steps; // عدد الخطوات
-  DateTime? lastStepsUpdate; // تاريخ آخر تحديث للخطوات
+  int? steps;
+  DateTime? lastStepsUpdate;
+
+  var name;
 
   UserData({
     required this.userId,
@@ -33,7 +33,6 @@ class UserData {
     this.lastStepsUpdate,
   });
 
-  // تحويل البيانات لـ Map عشان تخزينها في Firebase
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,
@@ -55,7 +54,6 @@ class UserData {
     };
   }
 
-  // تحويل البيانات من Firebase لـ Object
   factory UserData.fromMap(Map<String, dynamic> map, String userId) {
     return UserData(
       userId: userId,
