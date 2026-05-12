@@ -68,7 +68,6 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
                 children: [
                   SizedBox(height: screenHeight * 0.04),
 
-                  // العنوان
                   Text(
                     "تهانينا",
                     style: TextStyle(
@@ -90,7 +89,6 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
 
                   SizedBox(height: screenHeight * 0.035),
 
-                  // دايرة السعرات
                   SizedBox(
                     width: screenWidth * 0.52,
                     height: screenWidth * 0.52,
@@ -128,7 +126,6 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
 
                   SizedBox(height: screenHeight * 0.03),
 
-                  // Legend
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.06,
@@ -163,7 +160,6 @@ class _CongratulationsPageState extends State<CongratulationsPage> {
 
                   SizedBox(height: screenHeight * 0.03),
 
-                  // ✅ الكارد الأخضر بـ Expanded يملا المساحة الباقية لتحت
                   Expanded(
                     child: Container(
                       width: double.infinity,

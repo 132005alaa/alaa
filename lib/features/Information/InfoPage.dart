@@ -48,7 +48,6 @@ class _InfoPageState extends State<InfoPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ──
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenWidth * 0.04,
@@ -72,7 +71,6 @@ class _InfoPageState extends State<InfoPage> {
                   children: [
                     SizedBox(height: screenHeight * 0.005),
 
-                    // ── العنوان ──
                     Align(
                       alignment: Alignment.center,
                       child: Text(
@@ -100,7 +98,6 @@ class _InfoPageState extends State<InfoPage> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                    // ── Progress bar ──
                     Row(
                       children: [
                         Expanded(
@@ -120,7 +117,6 @@ class _InfoPageState extends State<InfoPage> {
 
                     SizedBox(height: screenHeight * 0.025),
 
-                    // ── رسالة الخطأ ──
                     if (_errorMessage != null)
                       Container(
                         width: double.infinity,
@@ -138,14 +134,12 @@ class _InfoPageState extends State<InfoPage> {
                         ),
                       ),
 
-                    // ── النوع ──
                     _buildLabel("ما هو نوعك؟", screenWidth),
                     SizedBox(height: screenHeight * 0.008),
                     _buildDropdown(screenWidth, screenHeight),
 
                     SizedBox(height: screenHeight * 0.022),
 
-                    // ── الطول ──
                     _buildLabel("ما هو طولك؟", screenWidth),
                     SizedBox(height: screenHeight * 0.008),
                     _buildTextField(
@@ -157,7 +151,6 @@ class _InfoPageState extends State<InfoPage> {
 
                     SizedBox(height: screenHeight * 0.022),
 
-                    // ── الوزن ──
                     _buildLabel("ما هو وزنك؟", screenWidth),
                     SizedBox(height: screenHeight * 0.008),
                     _buildTextField(
@@ -169,14 +162,12 @@ class _InfoPageState extends State<InfoPage> {
 
                     SizedBox(height: screenHeight * 0.022),
 
-                    // ── العمر ──
                     _buildLabel("ما هو عمرك؟", screenWidth),
                     SizedBox(height: screenHeight * 0.008),
                     _buildDateField(context, screenWidth, screenHeight),
 
                     SizedBox(height: screenHeight * 0.07),
 
-                    // ── زرار التالي ──
                     SizedBox(
                       width: double.infinity,
                       height: screenHeight * 0.065,

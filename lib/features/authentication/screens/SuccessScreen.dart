@@ -17,7 +17,6 @@ class SuccessScreen extends StatelessWidget {
             children: [
               SizedBox(height: screenHeight * 0.13),
 
-              // ── أيقونة الصح ──
               Container(
                 width: screenWidth * 0.22,
                 height: screenWidth * 0.22,
@@ -34,7 +33,6 @@ class SuccessScreen extends StatelessWidget {
 
               SizedBox(height: screenHeight * 0.03),
 
-              // ── تهانينا ──
               Text(
                 'تهانينا',
                 style: TextStyle(
@@ -46,7 +44,6 @@ class SuccessScreen extends StatelessWidget {
 
               SizedBox(height: screenHeight * 0.015),
 
-              // ── الوصف ──
               Text(
                 'يسعدنا ان تكون جزء من مجتمع يهتم\nبصحته ! مستعد لنبدأ رحلتنا سوا؟',
                 textAlign: TextAlign.center,
@@ -59,7 +56,6 @@ class SuccessScreen extends StatelessWidget {
 
               SizedBox(height: screenHeight * 0.055),
 
-              // ── الصورة ──
               Image.asset(
                 'assests/congratolation.jpg',
                 height: screenHeight * 0.3,
@@ -69,7 +65,6 @@ class SuccessScreen extends StatelessWidget {
 
               SizedBox(height: screenHeight * 0.07),
 
-              // ── زرار هيا بنا ──
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

@@ -8,6 +8,7 @@ import 'package:healthy_food/core/utils/shared_preferences_helper.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:healthy_food/services/user_data_service.dart';
 import '../../../models/user_data_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,15 +20,38 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String? _profileImagePath;
   double _userRating = 0;
+  // ignore: unused_field
   UserData? _userData;
   bool _isLoading = true;
+  String _userName = '';
 
   @override
   void initState() {
     super.initState();
-    _loadProfileImage();
-    _loadUserRating();
-    _loadUserData();
+    _loadAll();
+  }
+
+  Future<void> _loadAll() async {
+    await Future.wait([
+      _loadUserName(),
+      _loadProfileImage(),
+      _loadUserRating(),
+      _loadUserData(),
+    ]);
+  }
+
+  Future<void> _loadUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    await user?.reload();
+    final freshUser = FirebaseAuth.instance.currentUser;
+    if (mounted) {
+      setState(() {
+        _userName =
+            freshUser?.displayName ??
+            freshUser?.email?.split('@').first ??
+            'مستخدم';
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -41,41 +65,45 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  String _imageKeyForUser() {
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+    return 'profile_image_$uid';
+  }
+
   Future<void> _loadProfileImage() async {
-    final path = await SharedPreferencesHelper.getProfileImagePath();
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString(_imageKeyForUser());
     if (mounted) {
-      setState(() {
-        _profileImagePath = path;
-      });
+      setState(() => _profileImagePath = path);
     }
+  }
+
+  Future<void> _saveProfileImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_imageKeyForUser(), path);
+  }
+
+  Future<void> _deleteProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_imageKeyForUser());
+    if (mounted) setState(() => _profileImagePath = null);
   }
 
   Future<void> _loadUserRating() async {
     final rating = await SharedPreferencesHelper.getAppRating();
-    if (mounted) {
-      setState(() {
-        _userRating = rating ?? 0;
-      });
-    }
+    if (mounted) setState(() => _userRating = rating ?? 0);
   }
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      final path = pickedFile.path;
-      await SharedPreferencesHelper.saveProfileImagePath(path);
-      if (mounted) {
-        setState(() {
-          _profileImagePath = path;
-        });
-      }
+      await _saveProfileImage(pickedFile.path);
+      if (mounted) setState(() => _profileImagePath = pickedFile.path);
     }
   }
 
@@ -83,7 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('اختر صورة البروفايل'),
+        title: const Text('صورة البروفايل'),
         actions: [
           TextButton.icon(
             onPressed: () {
@@ -101,6 +129,18 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: const Icon(Icons.photo_library),
             label: const Text('المعرض'),
           ),
+          if (_profileImagePath != null)
+            TextButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteProfileImage();
+              },
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              label: const Text(
+                'حذف الصورة',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
         ],
       ),
     );
@@ -108,10 +148,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('الإعدادات', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'الإعدادات',
+          style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.048),
+        ),
         centerTitle: true,
         backgroundColor: const Color(0xff6BAF1A),
         leading: IconButton(
@@ -128,24 +174,25 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           children: [
-            // صورة البروفايل
+            SizedBox(height: screenHeight * 0.02),
+
             Center(
               child: GestureDetector(
                 onTap: _showImagePickerDialog,
                 child: Stack(
                   children: [
                     CircleAvatar(
-                      radius: 55,
+                      radius: screenWidth * 0.14,
                       backgroundColor: const Color(0xff6BAF1A),
                       backgroundImage: _profileImagePath != null
                           ? FileImage(File(_profileImagePath!))
                           : null,
                       child: _profileImagePath == null
-                          ? const Icon(
+                          ? Icon(
                               Icons.person,
-                              size: 55,
+                              size: screenWidth * 0.14,
                               color: Colors.white,
                             )
                           : null,
@@ -154,14 +201,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: EdgeInsets.all(screenWidth * 0.015),
                         decoration: const BoxDecoration(
                           color: Color(0xff6BAF1A),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.camera_alt,
-                          size: 22,
+                          size: screenWidth * 0.055,
                           color: Colors.white,
                         ),
                       ),
@@ -170,27 +217,33 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+
+            SizedBox(height: screenHeight * 0.015),
+
             Center(
               child: Text(
-                _isLoading
-                    ? 'جاري التحميل...'
-                    : (_userData?.name ?? 'اسم المستخدم'),
-                style: const TextStyle(
-                  fontSize: 18,
+                _isLoading ? 'جاري التحميل...' : _userName,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.048,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
 
-            _buildSectionHeader('الحساب الشخصي', Icons.person_outline),
-            const SizedBox(height: 8),
+            SizedBox(height: screenHeight * 0.025),
+
+            _buildSectionHeader(
+              'الحساب الشخصي',
+              Icons.person_outline,
+              screenWidth,
+            ),
+            SizedBox(height: screenHeight * 0.008),
             _buildSettingsCard([
               _buildSettingsItem(
                 icon: Icons.edit_outlined,
                 title: 'بياناتي الشخصية',
                 subtitle: 'تعديل الاسم، الوزن، الطول، الهدف',
+                screenWidth: screenWidth,
                 onTap: () async {
                   final result = await Navigator.push(
                     context,
@@ -199,20 +252,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   );
                   if (result == true && mounted) {
-                    _loadUserData();
+                    await _loadUserName();
+                    await _loadUserData();
                   }
                 },
               ),
             ]),
-            const SizedBox(height: 24),
 
-            _buildSectionHeader('معلومات', Icons.info_outline),
-            const SizedBox(height: 8),
+            SizedBox(height: screenHeight * 0.025),
+
+            _buildSectionHeader('معلومات', Icons.info_outline, screenWidth),
+            SizedBox(height: screenHeight * 0.008),
             _buildSettingsCard([
               _buildSettingsItem(
                 icon: Icons.info_outline,
                 title: 'عن التطبيق',
                 subtitle: 'تعرف على التطبيق وإصداره',
+                screenWidth: screenWidth,
                 onTap: () => _showAboutDialog(),
               ),
               _buildRatingItem(
@@ -220,6 +276,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: 'تقييم التطبيق',
                 subtitle: 'قيم التطبيق من 5 نجوم',
                 rating: _userRating,
+                screenWidth: screenWidth,
                 onRatingChanged: (rating) async {
                   setState(() => _userRating = rating);
                   await SharedPreferencesHelper.saveAppRating(rating);
@@ -237,46 +294,54 @@ class _SettingsPageState extends State<SettingsPage> {
                 icon: Icons.share_outlined,
                 title: 'مشاركة التطبيق',
                 subtitle: 'شارك التطبيق مع أصدقائك',
+                screenWidth: screenWidth,
                 onTap: _shareApp,
               ),
             ]),
-            const SizedBox(height: 24),
+
+            SizedBox(height: screenHeight * 0.025),
 
             _buildSettingsCard([
               _buildSettingsItem(
                 icon: Icons.logout,
                 title: 'تسجيل الخروج',
                 subtitle: 'الخروج من حسابك الحالي',
+                screenWidth: screenWidth,
                 onTap: () => _showLogoutDialog(),
                 isDestructive: true,
               ),
             ]),
-            const SizedBox(height: 16),
+
+            SizedBox(height: screenHeight * 0.015),
 
             Center(
               child: Text(
                 'الإصدار 1.0.0',
-                style: TextStyle(color: Colors.grey.shade500),
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: screenWidth * 0.035,
+                ),
               ),
             ),
-            const SizedBox(height: 20),
+
+            SizedBox(height: screenHeight * 0.02),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
+  Widget _buildSectionHeader(String title, IconData icon, double screenWidth) {
     return Row(
       children: [
-        Icon(icon, size: 22, color: const Color(0xff6BAF1A)),
-        const SizedBox(width: 8),
+        Icon(icon, size: screenWidth * 0.055, color: const Color(0xff6BAF1A)),
+        SizedBox(width: screenWidth * 0.02),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.bold,
-            color: Color(0xff2D5A0E),
+            color: const Color(0xff2D5A0E),
           ),
         ),
       ],
@@ -301,19 +366,23 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required double screenWidth,
     bool isDestructive = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: screenWidth * 0.035,
+        ),
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(screenWidth * 0.02),
               decoration: BoxDecoration(
                 color: isDestructive
                     ? Colors.red.withOpacity(0.1)
@@ -322,11 +391,11 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               child: Icon(
                 icon,
-                size: 22,
+                size: screenWidth * 0.055,
                 color: isDestructive ? Colors.red : const Color(0xff6BAF1A),
               ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: screenWidth * 0.035),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,22 +403,25 @@ class _SettingsPageState extends State<SettingsPage> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: screenWidth * 0.04,
                       fontWeight: FontWeight.w600,
                       color: isDestructive ? Colors.red : Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: screenWidth * 0.005),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.032,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.arrow_forward_ios,
-              size: 16,
+              size: screenWidth * 0.04,
               color: Colors.grey.shade400,
             ),
           ],
@@ -363,41 +435,52 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required String subtitle,
     required double rating,
+    required double screenWidth,
     required Function(double) onRatingChanged,
   }) {
     return GestureDetector(
       onTap: () => _showRatingDialog(onRatingChanged),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: screenWidth * 0.035,
+        ),
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(screenWidth * 0.02),
               decoration: BoxDecoration(
                 color: const Color(0xffEEF7CC),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 22, color: const Color(0xff6BAF1A)),
+              child: Icon(
+                icon,
+                size: screenWidth * 0.055,
+                color: const Color(0xff6BAF1A),
+              ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: screenWidth * 0.035),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: screenWidth * 0.005),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.032,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
@@ -408,14 +491,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 return Icon(
                   index < rating ? Icons.star : Icons.star_border,
                   color: Colors.amber,
-                  size: 18,
+                  size: screenWidth * 0.045,
                 );
               }),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: screenWidth * 0.02),
             Icon(
               Icons.arrow_forward_ios,
-              size: 16,
+              size: screenWidth * 0.04,
               color: Colors.grey.shade400,
             ),
           ],
@@ -426,7 +509,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _showRatingDialog(Function(double) onRatingChanged) {
     double tempRating = 0;
-
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -436,9 +518,7 @@ class _SettingsPageState extends State<SettingsPage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Center(
-                  child: Icon(Icons.star_rate, size: 50, color: Colors.amber),
-                ),
+                const Icon(Icons.star_rate, size: 50, color: Colors.amber),
                 const SizedBox(height: 16),
                 const Text(
                   'ما مدى رضاك عن التطبيق؟',
@@ -449,11 +529,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
                     return IconButton(
-                      onPressed: () {
-                        setDialogState(() {
-                          tempRating = index + 1.0;
-                        });
-                      },
+                      onPressed: () =>
+                          setDialogState(() => tempRating = index + 1.0),
                       icon: Icon(
                         index < tempRating ? Icons.star : Icons.star_border,
                         color: Colors.amber,
@@ -518,17 +595,17 @@ class _SettingsPageState extends State<SettingsPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
+          children: const [
+            Center(
               child: Icon(Icons.food_bank, size: 60, color: Color(0xff6BAF1A)),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               'Healthy Food هو تطبيق يساعدك على تبني نمط حياة صحي من خلال:',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            const Padding(
+            SizedBox(height: 8),
+            Padding(
               padding: EdgeInsets.only(right: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,8 +620,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            const Center(
+            SizedBox(height: 16),
+            Center(
               child: Text(
                 'الإصدار 1.0.0',
                 style: TextStyle(fontWeight: FontWeight.bold),

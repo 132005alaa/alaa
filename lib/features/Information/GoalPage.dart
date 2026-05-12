@@ -42,7 +42,6 @@ class _GoalPageState extends State<GoalPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ──
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenWidth * 0.04,
@@ -66,7 +65,6 @@ class _GoalPageState extends State<GoalPage> {
                   children: [
                     SizedBox(height: screenHeight * 0.005),
 
-                    // ── العنوان ──
                     Text(
                       "معلومات عنك",
                       style: TextStyle(
@@ -88,7 +86,6 @@ class _GoalPageState extends State<GoalPage> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                    // ── Progress bar (مكتمل) ──
                     Row(
                       children: [
                         Expanded(
@@ -110,7 +107,6 @@ class _GoalPageState extends State<GoalPage> {
 
                     SizedBox(height: screenHeight * 0.045),
 
-                    // ── السؤال ──
                     Text(
                       "ما هو هدفك؟",
                       style: TextStyle(
@@ -122,7 +118,6 @@ class _GoalPageState extends State<GoalPage> {
 
                     SizedBox(height: screenHeight * 0.025),
 
-                    // ── خيارات الهدف ──
                     ...goals.map(
                       (goal) =>
                           _buildGoalOption(goal, screenWidth, screenHeight),
@@ -130,7 +125,6 @@ class _GoalPageState extends State<GoalPage> {
 
                     SizedBox(height: screenHeight * 0.05),
 
-                    // ── زرار التالي ──
                     SizedBox(
                       width: double.infinity,
                       height: screenHeight * 0.065,
@@ -241,7 +235,6 @@ class _GoalPageState extends State<GoalPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // ── دايرة الاختيار ──
             Container(
               width: screenWidth * 0.055,
               height: screenWidth * 0.055,
@@ -268,7 +261,6 @@ class _GoalPageState extends State<GoalPage> {
                   : null,
             ),
 
-            // ── النص ──
             Text(
               goal,
               style: TextStyle(

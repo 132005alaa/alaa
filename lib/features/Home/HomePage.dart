@@ -17,7 +17,7 @@ import 'package:healthy_food/services/notification_service.dart';
 import 'package:healthy_food/features/profile/SleepInputPage.dart';
 import 'package:healthy_food/features/profile/StepsInputPage.dart';
 import 'package:healthy_food/services/meal_tracking_service.dart';
-import 'package:healthy_food/core/utils/shared_preferences_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class HomePage extends StatefulWidget {
@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Map<String, String>> days = [];
   String _currentMonth = '';
+
   final List<Map<String, dynamic>> meals = [
     {
       'title': 'الفطار',
@@ -76,6 +77,40 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  String get _imageKey {
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+    return 'profile_image_$uid';
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString(_imageKey);
+    if (mounted) {
+      setState(() => _profileImagePath = path);
+    }
+  }
+
+  Future<void> _refreshProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString(_imageKey);
+
+    final user = FirebaseAuth.instance.currentUser;
+    await user?.reload();
+    final freshUser = FirebaseAuth.instance.currentUser;
+
+    if (mounted) {
+      setState(() {
+        _profileImagePath = path;
+        if (freshUser != null) {
+          _userName =
+              freshUser.displayName ??
+              freshUser.email?.split('@').first ??
+              'مستخدم';
+        }
+      });
+    }
+  }
+
   Future<void> _loadUserData() async {
     try {
       final userDataService = UserDataService();
@@ -98,9 +133,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error loading user data: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -108,43 +141,16 @@ class _HomePageState extends State<HomePage> {
     try {
       final mealService = MealTrackingService();
       final calories = await mealService.getTodayCalories();
-      setState(() {
-        _totalCalories = calories;
-      });
+      if (mounted) setState(() => _totalCalories = calories);
     } catch (e) {
       print('Error loading calories: $e');
     }
   }
 
-  Future<void> _refreshProfileData() async {
-    final path = await SharedPreferencesHelper.getProfileImagePath();
-    final user = FirebaseAuth.instance.currentUser;
-    await user?.reload();
-    final freshUser = FirebaseAuth.instance.currentUser;
-    setState(() {
-      _profileImagePath = path;
-      if (freshUser != null) {
-        _userName =
-            freshUser.displayName ??
-            freshUser.email?.split('@').first ??
-            'مستخدم';
-      }
-    });
-  }
-
-  Future<void> _loadProfileImage() async {
-    final path = await SharedPreferencesHelper.getProfileImagePath();
-    setState(() {
-      _profileImagePath = path;
-    });
-  }
-
   void _listenToBurnedCalories() {
     _workoutService.getTodayWorkoutCaloriesStream().listen((calories) {
       if (!mounted) return;
-      setState(() {
-        _burnedCalories = calories;
-      });
+      setState(() => _burnedCalories = calories);
     });
   }
 
@@ -189,7 +195,6 @@ class _HomePageState extends State<HomePage> {
 
   void _generateDaysOfWeekFromDate(DateTime selectedDate) {
     _currentMonth = _getMonthName(selectedDate.month);
-
     int weekday = selectedDate.weekday;
     DateTime startOfWeek = selectedDate.subtract(Duration(days: weekday - 1));
 
@@ -257,9 +262,7 @@ class _HomePageState extends State<HomePage> {
 
   void _loadUnreadCount() {
     NotificationService().getUnreadCount().listen((count) {
-      setState(() {
-        _unreadCount = count;
-      });
+      if (mounted) setState(() => _unreadCount = count);
     });
   }
 
@@ -350,14 +353,15 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(width: screenWidth * 0.025),
                       CircleAvatar(
                         radius: screenWidth * 0.058,
-                        backgroundImage: _profileImagePath != null
-                            ? FileImage(File(_profileImagePath!))
-                            : const NetworkImage(
-                                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
-                                  )
-                                  as ImageProvider,
                         backgroundColor: Colors.grey.shade200,
-                        child: _profileImagePath == null
+                        backgroundImage:
+                            _profileImagePath != null &&
+                                File(_profileImagePath!).existsSync()
+                            ? FileImage(File(_profileImagePath!))
+                            : null,
+                        child:
+                            _profileImagePath == null ||
+                                !File(_profileImagePath!).existsSync()
                             ? Icon(
                                 Icons.person,
                                 color: const Color(0xff6BAF1A),
@@ -451,6 +455,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
+
                     SizedBox(height: verticalGap),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: sectionPadding),
@@ -466,9 +471,9 @@ class _HomePageState extends State<HomePage> {
                                 lastDate: DateTime(2030),
                               );
                               if (picked != null) {
-                                setState(() {
-                                  _generateDaysOfWeekFromDate(picked);
-                                });
+                                setState(
+                                  () => _generateDaysOfWeekFromDate(picked),
+                                );
                               }
                             },
                             child: const Icon(
@@ -488,16 +493,18 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
+
                     SizedBox(height: verticalGap),
+
                     // ── كارد السعرات ──
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: sectionPadding * 1.1,
                       ),
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xffD6EFA0),
-                          borderRadius: const BorderRadius.only(
+                        decoration: const BoxDecoration(
+                          color: Color(0xffD6EFA0),
+                          borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(40),
                             topRight: Radius.circular(20),
                             bottomLeft: Radius.circular(20),
@@ -551,7 +558,9 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ),
+
                             const Spacer(),
+
                             Padding(
                               padding: EdgeInsets.symmetric(
                                 vertical: screenWidth * 0.035,
@@ -579,6 +588,7 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                             ),
+
                             Container(
                               width: 8,
                               height: screenWidth * 0.38,
@@ -601,12 +611,14 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: verticalGap),
+
+                    // ── كارتا النوم والخطوات ──
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: sectionPadding),
                       child: Row(
                         children: [
-                          // كارد النوم
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
@@ -617,9 +629,7 @@ class _HomePageState extends State<HomePage> {
                                         const SleepInputPage(),
                                   ),
                                 );
-                                if (result == true && mounted) {
-                                  _loadUserData();
-                                }
+                                if (result == true && mounted) _loadUserData();
                               },
                               child: Container(
                                 height: screenHeight * 0.165,
@@ -727,7 +737,8 @@ class _HomePageState extends State<HomePage> {
                                             alignment: Alignment.centerRight,
                                             child: Text(
                                               userData?.sleepHours != null
-                                                  ? '${userData!.sleepHours!.toStringAsFixed(1)}'
+                                                  ? userData!.sleepHours!
+                                                        .toStringAsFixed(1)
                                                   : '--:--',
                                               style: TextStyle(
                                                 fontSize: screenWidth * 0.072,
@@ -743,45 +754,37 @@ class _HomePageState extends State<HomePage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
                                             children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 60,
-                                                    height: 4,
+                                              Container(
+                                                width: 60,
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                  color: Colors.white
+                                                      .withOpacity(0.2),
+                                                ),
+                                                child: FractionallySizedBox(
+                                                  widthFactor:
+                                                      userData?.sleepHours !=
+                                                          null
+                                                      ? (userData!.sleepHours! /
+                                                                8)
+                                                            .clamp(0.0, 1.0)
+                                                      : 0.0,
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  child: Container(
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                             4,
                                                           ),
-                                                      color: Colors.white
-                                                          .withOpacity(0.2),
-                                                    ),
-                                                    child: FractionallySizedBox(
-                                                      widthFactor:
-                                                          userData?.sleepHours !=
-                                                              null
-                                                          ? (userData!.sleepHours! /
-                                                                    8)
-                                                                .clamp(0.0, 1.0)
-                                                          : 0.0,
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                4,
-                                                              ),
-                                                          color: const Color(
-                                                            0xffA78BFA,
-                                                          ),
-                                                        ),
+                                                      color: const Color(
+                                                        0xffA78BFA,
                                                       ),
                                                     ),
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                               Text(
                                                 'ساعة يومياً',
@@ -803,7 +806,6 @@ class _HomePageState extends State<HomePage> {
 
                           SizedBox(width: screenWidth * 0.03),
 
-                          // كارد الخطوات
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
@@ -814,9 +816,7 @@ class _HomePageState extends State<HomePage> {
                                         const StepsInputPage(),
                                   ),
                                 );
-                                if (result == true && mounted) {
-                                  _loadUserData();
-                                }
+                                if (result == true && mounted) _loadUserData();
                               },
                               child: Container(
                                 height: screenHeight * 0.165,
@@ -918,43 +918,34 @@ class _HomePageState extends State<HomePage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
                                             children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 60,
-                                                    height: 4,
+                                              Container(
+                                                width: 60,
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                  color: Colors.white
+                                                      .withOpacity(0.2),
+                                                ),
+                                                child: FractionallySizedBox(
+                                                  widthFactor:
+                                                      userData?.steps != null
+                                                      ? (userData!.steps! /
+                                                                10000)
+                                                            .clamp(0.0, 1.0)
+                                                      : 0.0,
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  child: Container(
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                             4,
                                                           ),
-                                                      color: Colors.white
-                                                          .withOpacity(0.2),
-                                                    ),
-                                                    child: FractionallySizedBox(
-                                                      widthFactor:
-                                                          userData?.steps !=
-                                                              null
-                                                          ? (userData!.steps! /
-                                                                    10000)
-                                                                .clamp(0.0, 1.0)
-                                                          : 0.0,
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                4,
-                                                              ),
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
+                                                      color: Colors.white,
                                                     ),
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                               Text(
                                                 'من 10,000',
@@ -1070,41 +1061,31 @@ class _HomePageState extends State<HomePage> {
         if (meal['title'] == 'الفطار') {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MealSelectionPage()),
+            MaterialPageRoute(builder: (_) => const MealSelectionPage()),
           );
           _loadTodayCalories();
-        }
-        if (meal['title'] == 'الغداء') {
+        } else if (meal['title'] == 'الغداء') {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const LunchSelectionPage()),
+            MaterialPageRoute(builder: (_) => const LunchSelectionPage()),
           );
           _loadTodayCalories();
-        }
-        if (meal['title'] == 'العشاء') {
+        } else if (meal['title'] == 'العشاء') {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const DinnerSelectionPage(),
-            ),
+            MaterialPageRoute(builder: (_) => const DinnerSelectionPage()),
           );
           _loadTodayCalories();
-        }
-        if (meal['title'] == 'التسليه') {
+        } else if (meal['title'] == 'التسليه') {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const SnacksSelectionPage(),
-            ),
+            MaterialPageRoute(builder: (_) => const SnacksSelectionPage()),
           );
           _loadTodayCalories();
-        }
-        if (meal['title'] == 'التدريب') {
+        } else if (meal['title'] == 'التدريب') {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const WorkoutSelectionPage(),
-            ),
+            MaterialPageRoute(builder: (_) => const WorkoutSelectionPage()),
           );
           _loadTodayCalories();
         }
@@ -1166,6 +1147,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildBottomNav() {
     final screenWidth = MediaQuery.of(context).size.width;
     final iconSize = screenWidth * 0.068;
+
     final navItems = [
       {'icon': Icons.home_filled, 'index': 0, 'page': null},
       {'icon': Icons.bar_chart_outlined, 'index': 1, 'page': 'analysis'},
@@ -1209,7 +1191,7 @@ class _HomePageState extends State<HomePage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AnalysisPage(
+                      builder: (_) => AnalysisPage(
                         sleepHours: userData?.sleepHours,
                         steps: userData?.steps,
                         calories: _totalCalories,
@@ -1222,23 +1204,19 @@ class _HomePageState extends State<HomePage> {
                 case 'water':
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const WaterPage()),
+                    MaterialPageRoute(builder: (_) => const WaterPage()),
                   );
                   break;
                 case 'info':
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const InfoTipsPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const InfoTipsPage()),
                   );
                   break;
                 case 'settings':
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const SettingsPage()),
                   );
                   await _refreshProfileData();
                   break;

@@ -46,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               SizedBox(height: screenHeight * 0.09),
 
-              // ── العنوان ──
               Center(
                 child: Text(
                   'تسجيل دخول',
@@ -73,7 +72,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.04),
 
-              // ── رسالة الخطأ ──
               if (_errorMessage != null)
                 Container(
                   width: double.infinity,
@@ -91,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-              // ── البريد الإلكتروني ──
               Text(
                 'البريد الالكتروني',
                 style: TextStyle(
@@ -129,7 +126,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.022),
 
-              // ── كلمة المرور ──
               Text(
                 'كلمه المرور',
                 style: TextStyle(
@@ -176,7 +172,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.015),
 
-              // ── تذكرني ونسيت كلمة المرور ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -233,7 +228,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.035),
 
-              // ── زر تسجيل الدخول ──
               SizedBox(
                 width: double.infinity,
                 child: _isLoading
@@ -265,7 +259,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: screenHeight * 0.025),
 
-              // ── الانتقال للتسجيل ──
               Center(
                 child: GestureDetector(
                   onTap: () => Navigator.pushNamed(context, '/register'),
@@ -293,40 +286,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-              ),
-
-              SizedBox(height: screenHeight * 0.03),
-
-              Center(
-                child: Text(
-                  'او',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.058,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: screenHeight * 0.03),
-
-              // ── أيقونات التواصل الاجتماعي ──
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSocialIcon(Icons.apple, () {}, screenWidth),
-                  SizedBox(width: screenWidth * 0.1),
-                  _buildSocialIconNetwork(
-                    'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
-                    () {},
-                    screenWidth,
-                  ),
-                  SizedBox(width: screenWidth * 0.1),
-                  _buildSocialIconNetwork(
-                    'https://cdn-icons-png.flaticon.com/512/733/733547.png',
-                    () {},
-                    screenWidth,
-                  ),
-                ],
               ),
 
               SizedBox(height: screenHeight * 0.05),
@@ -401,64 +360,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Widget _buildSocialIcon(
-    IconData icon,
-    VoidCallback onTap,
-    double screenWidth,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: screenWidth * 0.14,
-        height: screenWidth * 0.14,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Icon(icon, size: screenWidth * 0.11, color: Colors.black),
-      ),
-    );
-  }
-
-  Widget _buildSocialIconNetwork(
-    String imageUrl,
-    VoidCallback onTap,
-    double screenWidth,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: screenWidth * 0.14,
-        height: screenWidth * 0.14,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Image.network(
-            imageUrl,
-            width: screenWidth * 0.08,
-            height: screenWidth * 0.08,
-          ),
-        ),
-      ),
-    );
   }
 
   @override

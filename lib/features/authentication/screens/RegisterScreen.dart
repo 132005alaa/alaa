@@ -35,7 +35,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               SizedBox(height: screenHeight * 0.07),
 
-              // ── زرار الرجوع ──
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Align(
@@ -58,7 +57,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.035),
 
-              // ── العنوان ──
               Center(
                 child: Text(
                   'انشاء حساب',
@@ -85,7 +83,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.03),
 
-              // ── رسالة الخطأ ──
               if (_errorMessage != null)
                 Container(
                   width: double.infinity,
@@ -103,7 +100,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
 
-              // ── الاسم ──
               _buildLabel('الاسم', screenWidth),
               SizedBox(height: screenHeight * 0.008),
               _buildTextField(
@@ -115,7 +111,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.02),
 
-              // ── البريد الإلكتروني ──
               _buildLabel('البريد الالكتروني', screenWidth),
               SizedBox(height: screenHeight * 0.008),
               _buildTextField(
@@ -128,7 +123,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.02),
 
-              // ── كلمة المرور ──
               _buildLabel('كلمه المرور', screenWidth),
               SizedBox(height: screenHeight * 0.008),
               _buildTextField(
@@ -152,7 +146,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.02),
 
-              // ── تأكيد كلمة المرور ──
               _buildLabel('تأكيد كلمه المرور', screenWidth),
               SizedBox(height: screenHeight * 0.008),
               _buildTextField(
@@ -177,7 +170,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: screenHeight * 0.07),
 
-              // ── زرار التسجيل ──
               SizedBox(
                 width: double.infinity,
                 child: _isLoading

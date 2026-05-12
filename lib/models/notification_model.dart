@@ -17,6 +17,8 @@ class NotificationModel {
     this.isRead = false,
   });
 
+  DateTime get createdAt => timestamp;
+
   Map<String, dynamic> toMap() {
     return {
       'title': title,
@@ -35,7 +37,9 @@ class NotificationModel {
       subtitle: map['subtitle'] ?? '',
       emoji: map['emoji'] ?? '',
       section: map['section'] ?? '',
-      timestamp: DateTime.parse(map['timestamp']),
+      timestamp: map['timestamp'] != null
+          ? DateTime.parse(map['timestamp'])
+          : DateTime.now(),
       isRead: map['isRead'] ?? false,
     );
   }

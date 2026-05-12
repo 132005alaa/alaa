@@ -23,6 +23,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    // ignore: unused_local_variable
     final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(

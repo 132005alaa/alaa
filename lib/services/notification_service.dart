@@ -45,6 +45,32 @@ class NotificationService {
         .update({'isRead': true});
   }
 
+  Future<void> markAllAsRead() async {
+    String userId = _auth.currentUser!.uid;
+
+    var snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      await doc.reference.update({'isRead': true});
+    }
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    String userId = _auth.currentUser!.uid;
+
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .doc(notificationId)
+        .delete();
+  }
+
   Future<void> addNotification({
     required String title,
     required String subtitle,
@@ -278,46 +304,28 @@ class NotificationService {
     );
   }
 
+  Future<void> showGoalAchievedNotification() async {
+    await addNotification(
+      title: '🎉 تهانينا! أكملت هدف شرب الماء',
+      subtitle: 'شربت 2500 مل اليوم! حافظ على ترطيب جسمك',
+      emoji: '💙',
+      section: _getSection(DateTime.now()),
+    );
+  }
+
   String _getSection(DateTime date) {
     DateTime now = DateTime.now();
-    if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day) {
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    if (dateOnly == today) {
       return 'اليوم';
-    } else if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day - 1) {
-      return 'امس';
-    } else if (date.isAfter(now.subtract(Duration(days: 7)))) {
-      return 'خلال الاسبوع';
+    } else if (dateOnly == today.subtract(const Duration(days: 1))) {
+      return 'أمس';
+    } else if (date.isAfter(now.subtract(const Duration(days: 7)))) {
+      return 'خلال الأسبوع';
     } else {
-      return 'الاسبوع الماضي';
+      return 'أقدم من ذلك';
     }
   }
-
-  Future<void> markAllAsRead() async {
-    String userId = _auth.currentUser!.uid;
-
-    var snapshot = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('notifications')
-        .where('isRead', isEqualTo: false)
-        .get();
-
-    for (var doc in snapshot.docs) {
-      await doc.reference.update({'isRead': true});
-    }
-    // ignore: unused_element
-    Future<void> showGoalAchievedNotification() async {
-      await addNotification(
-        title: '🎉 تهانينا! أكملت هدف شرب الماء',
-        subtitle: 'شربت 2500 مل اليوم! حافظ على ترطيب جسمك',
-        emoji: '💙',
-        section: _getSection(DateTime.now()),
-      );
-    }
-  }
-
-  void showGoalAchievedNotification() {}
 }
